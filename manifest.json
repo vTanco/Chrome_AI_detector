@@ -9,6 +9,11 @@
     "activeTab",
     "scripting"
   ],
+  "host_permissions": [
+    "*://docs.google.com/*",
+    "*://classroom.google.com/*",
+    "<all_urls>"
+  ],
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "DocenteLens - Panel del Docente",

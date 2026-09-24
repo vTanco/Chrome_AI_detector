@@ -281,3 +281,29 @@
   font-weight: 700 !important;
   color: #1a73e8 !important;
 }
+
+/* Iluminación especial para el Canvas y Páginas de Google Docs */
+.docentelens-gdocs-highlight {
+  box-shadow: 0 0 0 6px #d97706, 0 0 40px rgba(217, 119, 6, 0.45) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease-in-out !important;
+  animation: docentelens-illuminate 0.25s ease-out !important;
+}
+
+.docentelens-gdocs-highlight-anthropic {
+  box-shadow: 0 0 0 6px #d97706, 0 0 45px rgba(217, 119, 6, 0.55) !important;
+  border-radius: 8px !important;
+  animation: docentelens-illuminate 0.25s ease-out !important;
+}
+
+.docentelens-gdocs-highlight-google {
+  box-shadow: 0 0 0 6px #1a73e8, 0 0 45px rgba(26, 115, 232, 0.55) !important;
+  border-radius: 8px !important;
+  animation: docentelens-illuminate 0.25s ease-out !important;
+}
+
+.docentelens-gdocs-highlight-openai {
+  box-shadow: 0 0 0 6px #10a37f, 0 0 45px rgba(16, 163, 127, 0.55) !important;
+  border-radius: 8px !important;
+  animation: docentelens-illuminate 0.25s ease-out !important;
+}

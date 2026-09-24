@@ -1,16 +1,93 @@
 /**
  * DocenteLens - Script de Contenido Principal
- * Gestiona la interacción "mantener pulsado el ratón para resaltar contenido IA en tiempo real"
+ * Gestiona la interacción "mantener pulsada la tecla Comando ⌘ para iluminar contenido IA en tiempo real"
+ * Compatible con cualquier página web, Google Classroom y Documentos de Google (Canvas & Text Layers).
  */
 
 (function () {
+  // 1. Detección de Frame: Los iframes ocultos (como .docs-texteventtarget-iframe en Google Docs)
+  // deben capturar las pulsaciones y reenviarlas al marco superior (window.top) vía postMessage.
+  const isTopFrame = window === window.top;
+  const isGoogleDocs = window.location.hostname.includes("docs.google.com");
+  const isGoogleClassroom = window.location.hostname.includes("classroom.google.com");
+
+  // Comprobar si es la tecla Comando (⌘ en Mac) o Control (Windows/Linux)
+  function isCommandKey(e) {
+    const isMac = (navigator.platform || "").toUpperCase().indexOf("MAC") >= 0;
+    if (isMac) {
+      return e.key === "Meta" || e.code === "MetaLeft" || e.code === "MetaRight" || e.metaKey;
+    } else {
+      return e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight" || e.ctrlKey;
+    }
+  }
+
+  // Si nos encontramos en un sub-iframe (como el iframe de teclado de Google Docs o Classroom)
+  if (!isTopFrame) {
+    window.addEventListener(
+      "keydown",
+      e => {
+        if (isCommandKey(e)) {
+          try {
+            window.top.postMessage(
+              { type: "DOCENTELENS_KEY", action: "keydown", repeat: e.repeat },
+              "*"
+            );
+          } catch (err) {}
+        }
+      },
+      true
+    );
+
+    window.addEventListener(
+      "keyup",
+      e => {
+        if (isCommandKey(e)) {
+          try {
+            window.top.postMessage({ type: "DOCENTELENS_KEY", action: "keyup" }, "*");
+          } catch (err) {}
+        }
+      },
+      true
+    );
+
+    window.addEventListener(
+      "paste",
+      e => {
+        try {
+          const text = e.clipboardData?.getData("text/plain");
+          if (text && text.trim().length > 15) {
+            window.top.postMessage({ type: "DOCENTELENS_CLIPBOARD", action: "paste", text: text.trim() }, "*");
+          }
+        } catch (err) {}
+      },
+      true
+    );
+
+    window.addEventListener(
+      "copy",
+      e => {
+        try {
+          const text = e.clipboardData?.getData("text/plain");
+          if (text && text.trim().length > 15) {
+            window.top.postMessage({ type: "DOCENTELENS_CLIPBOARD", action: "copy", text: text.trim() }, "*");
+          }
+        } catch (err) {}
+      },
+      true
+    );
+
+    // Los sub-iframes no deben instanciar elementos UI en su DOM invisible
+    return;
+  }
+
+  // Prevenir inyecciones duplicadas en el marco principal
   if (window._docenteLensInitialized) return;
   window._docenteLensInitialized = true;
 
   // Estado local y configuración por defecto
   const state = {
     isEnabled: true,
-    triggerMode: "commandKey", // "commandKey" (Tecla Comando ⌘ en Mac / Ctrl), "altClick", "middleClick", "rightClick", "pinned"
+    triggerMode: "commandKey", // "commandKey" (Comando ⌘ en Mac / Ctrl), "altClick", "middleClick", "rightClick", "pinned"
     sensitivity: "balanced",
     detectText: true,
     detectImages: true,
@@ -22,7 +99,12 @@
     gdocsCardElement: null
   };
 
-  // Cargar configuración guardada (con protección para iframes sandboxed o pruebas locales)
+  // Variables de caché para Google Docs y portapapeles
+  let cachedGoogleDocsText = null;
+  let lastGoogleDocsFetchTime = 0;
+  let lastPastedOrCopiedText = null;
+
+  // Cargar configuración guardada
   try {
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
       chrome.storage.sync.get(
@@ -39,7 +121,6 @@
         }
       );
 
-      // Escuchar cambios de configuración desde el popup
       chrome.storage.onChanged.addListener((changes, area) => {
         if (area === "sync") {
           for (const [key, { newValue }] of Object.entries(changes)) {
@@ -57,11 +138,11 @@
     initUIElements();
   }
 
-  // Inicializar contenedores de HUD y Tooltip
+  // Inicializar contenedores de HUD, Tooltip y Tarjeta de Google Docs
   function initUIElements() {
     if (!document.body) return;
 
-    // Tooltip Pedagógico
+    // 1. Tooltip Pedagógico Universal
     if (!state.tooltipElement) {
       const tooltip = document.createElement("div");
       tooltip.id = "docente-lens-tooltip-root";
@@ -71,7 +152,6 @@
             <span class="tt-title">DocenteLens • Análisis</span>
             <span class="tt-score" id="tt-score-badge">0%</span>
           </div>
-          <!-- Atribución de Modelo / Compañía y Marca de Agua -->
           <div class="tt-model-attribution" id="tt-model-box">
             <span class="tt-model-icon" id="tt-model-icon">🤖</span>
             <div class="tt-model-info">
@@ -89,7 +169,7 @@
       state.tooltipElement = document.getElementById("docentelens-tooltip");
     }
 
-    // HUD Flotante Activo
+    // 2. HUD Flotante Activo Superior
     if (!state.hudElement) {
       const hud = document.createElement("div");
       hud.id = "docentelens-hud";
@@ -102,14 +182,14 @@
       state.hudElement = hud;
     }
 
-    // Tarjeta Especial de Análisis para Google Docs y Classroom
+    // 3. Tarjeta de Análisis Flotante para Google Docs y Classroom
     if (!state.gdocsCardElement) {
       const gdocsCard = document.createElement("div");
       gdocsCard.id = "docentelens-gdocs-root";
       gdocsCard.innerHTML = `
         <div id="docentelens-gdocs-card" style="display: none;">
           <div class="gdocs-header">
-            <span class="gdocs-badge-env">📄 Google Docs & Classroom • Análisis</span>
+            <span class="gdocs-badge-env">📄 Google Docs • Peritaje de Redacción IA</span>
             <span class="tt-score" id="gdocs-score-badge">0%</span>
           </div>
           <div class="tt-model-attribution" id="gdocs-model-box">
@@ -127,24 +207,66 @@
       state.gdocsCardElement = document.getElementById("docentelens-gdocs-card");
     }
 
-    hookGoogleDocsEvents();
+    hookAllInputsAndIframes();
   }
 
-  const isGoogleDocs = window.location.hostname.includes("docs.google.com");
-  const isGoogleClassroom = window.location.hostname.includes("classroom.google.com");
+  // Escuchar mensajes provenientes de sub-iframes (teclado de Google Docs / Classroom)
+  window.addEventListener("message", e => {
+    if (e.data?.type === "DOCENTELENS_KEY") {
+      if (e.data.action === "keydown" && !e.data.repeat) {
+        handleHoldStart();
+      } else if (e.data.action === "keyup") {
+        handleHoldEnd();
+      }
+    } else if (e.data?.type === "DOCENTELENS_CLIPBOARD") {
+      if (e.data.text && e.data.text.trim().length > 15) {
+        lastPastedOrCopiedText = e.data.text.trim();
+        cachedGoogleDocsText = e.data.text.trim();
+      }
+    }
+  });
 
-  // Capturar eventos de teclado dentro de los iframes internos de Google Docs
-  function hookGoogleDocsEvents() {
-    if (!isGoogleDocs) return;
-
-    function attach() {
+  // Vincular eventos de teclado y portapapeles a todos los iframes presentes y futuros
+  function hookAllInputsAndIframes() {
+    function attachToIframes() {
       const iframes = document.querySelectorAll(".docs-texteventtarget-iframe, iframe");
       iframes.forEach(iframe => {
         if (!iframe._docenteLensHooked) {
           try {
             if (iframe.contentWindow) {
-              iframe.contentWindow.addEventListener("keydown", handleKeyDown, true);
-              iframe.contentWindow.addEventListener("keyup", handleKeyUp, true);
+              iframe.contentWindow.addEventListener(
+                "keydown",
+                e => {
+                  if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+                    if (e.repeat) return;
+                    handleHoldStart();
+                  }
+                },
+                true
+              );
+
+              iframe.contentWindow.addEventListener(
+                "keyup",
+                e => {
+                  if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+                    handleHoldEnd();
+                  }
+                },
+                true
+              );
+
+              iframe.contentWindow.addEventListener(
+                "paste",
+                e => {
+                  const text = e.clipboardData?.getData("text/plain");
+                  if (text && text.trim().length > 15) {
+                    lastPastedOrCopiedText = text.trim();
+                    cachedGoogleDocsText = text.trim();
+                  }
+                },
+                true
+              );
+
               iframe._docenteLensHooked = true;
             }
           } catch (e) {}
@@ -152,29 +274,96 @@
       });
     }
 
-    attach();
-    const observer = new MutationObserver(attach);
+    attachToIframes();
+    const observer = new MutationObserver(attachToIframes);
     observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
   }
 
-  // Obtener texto seleccionado en Google Docs
-  function getGoogleDocsSelectedText() {
-    try {
-      const iframes = document.querySelectorAll(".docs-texteventtarget-iframe, iframe");
-      for (const iframe of iframes) {
-        if (iframe.contentDocument) {
-          const sel = iframe.contentDocument.getSelection()?.toString();
-          if (sel && sel.trim().length > 20) return sel.trim();
-        }
+  // Interceptar copy y paste en la ventana superior para alimentar el buffer de texto
+  window.addEventListener(
+    "paste",
+    e => {
+      const text = e.clipboardData?.getData("text/plain");
+      if (text && text.trim().length > 15) {
+        lastPastedOrCopiedText = text.trim();
+        cachedGoogleDocsText = text.trim();
       }
-    } catch (e) {}
+    },
+    true
+  );
 
-    const winSel = window.getSelection()?.toString();
-    if (winSel && winSel.trim().length > 20) return winSel.trim();
+  window.addEventListener(
+    "copy",
+    e => {
+      const text = e.clipboardData?.getData("text/plain");
+      if (text && text.trim().length > 15) {
+        lastPastedOrCopiedText = text.trim();
+      }
+    },
+    true
+  );
+
+  // Extraer el identificador del documento de Google Docs
+  function getGoogleDocsId() {
+    const match = window.location.pathname.match(/\/document\/(?:u\/\d+\/)?d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+  }
+
+  // Extraer el texto completo del documento de Google Docs (Export Nativo + Fallbacks DOM)
+  async function getGoogleDocsContent() {
+    const docId = getGoogleDocsId();
+    const now = Date.now();
+
+    // 1. Usar export nativo mediante la sesión autenticada de Google Docs
+    if (docId) {
+      if (cachedGoogleDocsText && now - lastGoogleDocsFetchTime < 3000) {
+        return cachedGoogleDocsText;
+      }
+
+      try {
+        const exportUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
+        const res = await fetch(exportUrl, { credentials: "include" });
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.trim().length > 15) {
+            cachedGoogleDocsText = text.trim();
+            lastGoogleDocsFetchTime = now;
+            return cachedGoogleDocsText;
+          }
+        }
+      } catch (err) {
+        // En caso de bloqueo por red, proceder con los siguientes fallbacks
+      }
+    }
+
+    // 2. Si hay texto recién pegado o copiado en este documento
+    if (lastPastedOrCopiedText && lastPastedOrCopiedText.length > 20) {
+      return lastPastedOrCopiedText;
+    }
+
+    // 3. Inspeccionar capas de accesibilidad y nodos DOM de Google Docs
+    const accNodes = document.querySelectorAll(
+      '[aria-label="Document content"], [role="textbox"], .docs-texteventtarget-iframe, [data-paragraph-id], .kix-lineview'
+    );
+    let domText = "";
+    accNodes.forEach(n => {
+      const t = n.innerText || n.textContent || "";
+      if (t) domText += " " + t;
+    });
+    if (domText.trim().length > 25) {
+      return domText.trim();
+    }
+
+    // 4. Selección manual tradicional
+    const sel = window.getSelection()?.toString();
+    if (sel && sel.trim().length > 20) {
+      return sel.trim();
+    }
 
     return null;
   }
 
+  // Mostrar tarjeta de análisis en Google Docs
   function showGoogleDocsCard(result) {
     if (!state.gdocsCardElement) return;
     const scoreBadge = document.getElementById("gdocs-score-badge");
@@ -191,10 +380,10 @@
     if (result.modelAttribution) {
       modelBox.style.display = "flex";
       const ma = result.modelAttribution;
-      modelName.textContent = `${ma.predictedModel} (~${ma.confidence}% de certeza)`;
+      modelName.textContent = `${ma.predictedModel} (~${ma.confidence}% certeza de estilo)`;
       watermarkDesc.textContent = ma.watermarkInfo || "Firma estadística de procedencia";
       modelBox.style.borderLeftColor = ma.color;
-      modelIcon.textContent = ma.company === "OpenAI" ? "🟢" : ma.company === "Anthropic" ? "🟠" : "🔵";
+      modelIcon.textContent = ma.company === "OpenAI" ? "🟢" : ma.company === "Anthropic" ? "🟠" : (ma.company.includes("Google") ? "🔵" : "🤖");
     } else {
       modelBox.style.display = "none";
     }
@@ -223,58 +412,62 @@
     }
   }
 
-  // Comprobar si es la tecla Comando (⌘ en Mac) o Control
-  function isCommandKey(e) {
-    const isMac = (navigator.platform || "").toUpperCase().indexOf("MAC") >= 0;
-    if (isMac) {
-      return e.key === "Meta" || e.code === "MetaLeft" || e.code === "MetaRight";
-    } else {
-      return e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight";
+  // Inicio de activación (mantener pulsado)
+  function handleHoldStart() {
+    if (!state.isEnabled) return;
+    state.isHolding = true;
+    showHUD();
+    scanAndHighlight();
+  }
+
+  // Fin de activación (soltar tecla)
+  function handleHoldEnd() {
+    if (state.triggerMode === "commandKey" && state.isHolding && !state.isPinned) {
+      state.isHolding = false;
+      hideHUD();
+      clearHighlights();
+      hideTooltip();
+      hideGoogleDocsCard();
     }
   }
+
+  // Eventos de teclado en la ventana superior
+  window.addEventListener(
+    "keydown",
+    e => {
+      if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+        if (e.repeat) return;
+        handleHoldStart();
+      }
+    },
+    true
+  );
+
+  window.addEventListener(
+    "keyup",
+    e => {
+      if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+        handleHoldEnd();
+      }
+    },
+    true
+  );
 
   // Comprobar si el evento de ratón coincide con el disparador (si está en modo ratón)
   function matchesMouseTrigger(e) {
     if (!state.isEnabled) return false;
-
     switch (state.triggerMode) {
       case "middleClick":
-        return e.button === 1; // Clic en la rueda
+        return e.button === 1;
       case "altClick":
-        return e.altKey && e.button === 0; // Alt / Option + Clic izquierdo
+        return e.altKey && e.button === 0;
       case "rightClick":
-        return e.button === 2; // Clic derecho
+        return e.button === 2;
       default:
         return false;
     }
   }
 
-  function handleKeyDown(e) {
-    if (!state.isEnabled) return;
-    if (state.triggerMode === "commandKey" && isCommandKey(e)) {
-      if (e.repeat) return;
-      state.isHolding = true;
-      showHUD();
-      scanAndHighlight();
-    }
-  }
-
-  function handleKeyUp(e) {
-    if (state.triggerMode === "commandKey" && isCommandKey(e)) {
-      if (state.isHolding && !state.isPinned) {
-        state.isHolding = false;
-        hideHUD();
-        clearHighlights();
-        hideTooltip();
-        hideGoogleDocsCard();
-      }
-    }
-  }
-
-  window.addEventListener("keydown", handleKeyDown, true);
-  window.addEventListener("keyup", handleKeyUp, true);
-
-  // Evento Mousedown: Si está configurado en modo ratón
   window.addEventListener(
     "mousedown",
     e => {
@@ -290,7 +483,6 @@
     true
   );
 
-  // Evento Mouseup: Restaurar si se usa disparador de ratón
   window.addEventListener(
     "mouseup",
     e => {
@@ -299,22 +491,22 @@
         hideHUD();
         clearHighlights();
         hideTooltip();
+        hideGoogleDocsCard();
       }
     },
     true
   );
 
-  // Si la ventana pierde el foco, limpiar por seguridad
   window.addEventListener("blur", () => {
     if (state.isHolding && !state.isPinned) {
       state.isHolding = false;
       hideHUD();
       clearHighlights();
       hideTooltip();
+      hideGoogleDocsCard();
     }
   });
 
-  // Prevenir menú contextual si se usa el clic derecho como disparador
   window.addEventListener(
     "contextmenu",
     e => {
@@ -325,28 +517,60 @@
     true
   );
 
-  // Escanear el DOM y aplicar resaltados
-  function scanAndHighlight() {
+  // Escaneo y Resaltado Principal
+  async function scanAndHighlight() {
     clearHighlights();
     hideGoogleDocsCard();
 
-    // Soporte especial en Google Docs (Editor y Vistas de Tareas)
+    // A. Tratamiento específico e iluminación para Google Docs
     if (isGoogleDocs) {
-      const selectedText = getGoogleDocsSelectedText();
-      if (selectedText) {
-        const result = AITextDetector.analyze(selectedText, state.sensitivity);
-        if (result.eligible) {
+      const hudText = document.getElementById("docentelens-hud-text");
+      if (hudText) {
+        hudText.textContent = "DocenteLens Activo • Analizando Documento de Google...";
+      }
+
+      const docContent = await getGoogleDocsContent();
+      if (!state.isHolding && !state.isPinned) return; // Se soltó la tecla antes de finalizar
+
+      if (docContent) {
+        const result = AITextDetector.analyze(docContent, state.sensitivity);
+        if (result.eligible && result.level !== "none") {
+          // Iluminar la superficie del Canvas y Páginas de Google Docs
+          const gdocsElements = document.querySelectorAll(
+            ".kix-page, .kix-page-paginated, .kix-canvas-tile-content, .docs-editor-container, #docs-editor, .kix-zoom-wrapper"
+          );
+
+          let highlightClass = "docentelens-gdocs-highlight";
+          if (result.modelAttribution) {
+            const comp = result.modelAttribution.company || "";
+            if (comp === "OpenAI") highlightClass = "docentelens-gdocs-highlight-openai";
+            else if (comp === "Anthropic") highlightClass = "docentelens-gdocs-highlight-anthropic";
+            else if (comp.includes("Google")) highlightClass = "docentelens-gdocs-highlight-google";
+          }
+
+          gdocsElements.forEach(el => {
+            el.classList.add(highlightClass);
+            state.highlightedElements.push({ element: el, badge: null });
+          });
+
           showGoogleDocsCard(result);
+
+          if (hudText) {
+            const mName = result.modelAttribution ? result.modelAttribution.predictedModel : "IA";
+            hudText.textContent = `DocenteLens Activo • ${mName} detectado (~${result.score}%) en Google Docs`;
+          }
+          return;
+        } else if (hudText) {
+          hudText.textContent = "DocenteLens Activo • Google Docs: Redacción orgánica o humana detectada";
+          return;
         }
-      } else {
-        const hudText = document.getElementById("docentelens-hud-text");
-        if (hudText) {
-          hudText.textContent = "Google Docs: Selecciona texto (o Cmd+A) y mantén presionado ⌘";
-        }
+      } else if (hudText) {
+        hudText.textContent = "Google Docs: Escribe, pega o selecciona texto y mantén presionado ⌘";
+        return;
       }
     }
 
-    // 1. Análisis de Texto
+    // B. Análisis de Texto en Páginas Web Estándar y Google Classroom
     if (state.detectText && typeof AITextDetector !== "undefined") {
       const textNodes = getInspectableTextElements();
 
@@ -358,20 +582,19 @@
           const highlightClass = result.level === "high" ? "docentelens-highlight-high" : "docentelens-highlight-medium";
           el.classList.add(highlightClass);
 
-          // Crear badge informativo con atribución de modelo
           const badge = document.createElement("span");
           badge.className = `docentelens-badge ${result.level === "high" ? "docentelens-badge-high" : "docentelens-badge-medium"}`;
-          
+
           let modelTag = "IA";
           if (result.modelAttribution) {
-            if (result.modelAttribution.company === "OpenAI") modelTag = "ChatGPT";
-            else if (result.modelAttribution.company === "Anthropic") modelTag = "Claude";
-            else if (result.modelAttribution.company === "Google DeepMind" || result.modelAttribution.company === "Google") modelTag = "Gemini";
+            const comp = result.modelAttribution.company || "";
+            if (comp === "OpenAI") modelTag = "ChatGPT";
+            else if (comp === "Anthropic") modelTag = "Claude";
+            else if (comp.includes("Google")) modelTag = "Gemini";
           }
           badge.textContent = `${modelTag} ~${result.score}%`;
           el.appendChild(badge);
 
-          // Guardar metadatos para tooltip interactivo
           el._docenteLensData = result;
           el.addEventListener("mouseenter", onElementMouseEnter);
           el.addEventListener("mouseleave", onElementMouseLeave);
@@ -381,7 +604,7 @@
       });
     }
 
-    // 2. Análisis de Imágenes
+    // C. Análisis de Imágenes
     if (state.detectImages && typeof AIImageDetector !== "undefined") {
       const images = Array.from(document.querySelectorAll("img"));
 
@@ -418,7 +641,11 @@
       element.classList.remove(
         "docentelens-highlight-high",
         "docentelens-highlight-medium",
-        "docentelens-image-highlight"
+        "docentelens-image-highlight",
+        "docentelens-gdocs-highlight",
+        "docentelens-gdocs-highlight-anthropic",
+        "docentelens-gdocs-highlight-google",
+        "docentelens-gdocs-highlight-openai"
       );
       if (badge && badge.parentNode) {
         badge.parentNode.removeChild(badge);
@@ -430,31 +657,28 @@
     state.highlightedElements = [];
   }
 
-  // Obtener elementos de texto relevantes para inspeccionar de forma universal (incluyendo Classroom y Google Docs)
+  // Obtener elementos de texto relevantes para inspeccionar
   function getInspectableTextElements() {
-    // Buscar párrafos, citas y contenedores de texto estándar y educativos (Classroom / Docs)
     const rawElements = Array.from(
       document.querySelectorAll(
-        "p, li, blockquote, dd, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment'], div[data-message-author], .MuiTypography-root, .kix-lineview, .kix-paragraphrenderer, .kix-wordhtmlgenerator-wordnode, [aria-label]"
+        "p, li, blockquote, dd, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment'], div[data-message-author], .MuiTypography-root, [aria-label]"
       )
     );
 
-    // Contenedores tipo div/section que tienen texto directo sustancial sin etiquetas p hijas
     const leafContainers = Array.from(document.querySelectorAll("div, section, td, [role='listitem']")).filter(container => {
-      if (container.querySelector("p, ul, ol, table, article, div")) return false; // Solo contenedores hoja
+      if (container.querySelector("p, ul, ol, table, article, div")) return false;
       const text = (container.innerText || "").trim();
       return text.length > 60;
     });
 
     const combined = [...new Set([...rawElements, ...leafContainers])];
 
-    // Filtrar elementos visibles con texto suficiente y fuera de elementos de navegación/scripts
     return combined.filter(el => {
       if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button, .docs-title-widget, .docs-menubar")) {
         return false;
       }
       const text = el.innerText || "";
-      return text.trim().length > 50 && isElementInViewport(el);
+      return text.trim().length > 45 && isElementInViewport(el);
     });
   }
 
@@ -468,7 +692,7 @@
     );
   }
 
-  // Tooltip Pedagógico para docentes al pasar el cursor sobre un bloque detectado
+  // Manejo de Tooltip Pedagógico
   function onElementMouseEnter(e) {
     const target = e.currentTarget;
     const data = target._docenteLensData;
@@ -485,7 +709,6 @@
     scoreBadge.textContent = `${data.score}% Probabilidad`;
     scoreBadge.className = `tt-score ${data.level === "high" ? "tt-score-high" : "tt-score-medium"}`;
 
-    // Mostrar atribución de modelo y marca de agua
     if (data.modelAttribution && modelBox) {
       modelBox.style.display = "flex";
       const ma = data.modelAttribution;
@@ -573,6 +796,7 @@
           hideHUD();
           clearHighlights();
           hideTooltip();
+          hideGoogleDocsCard();
         }
         sendResponse({ isPinned: state.isPinned });
       } else if (request.action === "getStatus") {
