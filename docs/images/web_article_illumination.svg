@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
+  <defs>
+    <filter id="shadow-web" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+    <filter id="tt-shadow" x="-10%" y="-10%" width="120%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Browser Frame -->
+  <rect width="960" height="560" fill="#f8fafc" rx="8"/>
+  <rect width="960" height="42" fill="#e2e8f0" rx="8"/>
+  <circle cx="24" cy="21" r="6" fill="#ef4444"/>
+  <circle cx="44" cy="21" r="6" fill="#f59e0b"/>
+  <circle cx="64" cy="21" r="6" fill="#10b981"/>
+  <rect x="120" y="8" width="720" height="26" rx="6" fill="#ffffff"/>
+  <text x="140" y="25" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" fill="#475569">https://campus-virtual.edu/trabajos/evaluacion-etica-algoritmos</text>
+
+  <!-- Main Article Content Container -->
+  <rect x="140" y="70" width="680" height="460" fill="#ffffff" filter="url(#shadow-web)" rx="8"/>
+
+  <text x="180" y="115" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22" font-weight="bold" fill="#0f172a">Analisis Comparativo de Modelos Fundacionales</text>
+
+  <!-- Illuminated AI Paragraph 1 (ChatGPT) -->
+  <rect x="175" y="135" width="610" height="75" rx="6" fill="rgba(239, 68, 68, 0.14)" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="175" y="135" width="5" height="75" fill="#ef4444" rx="2"/>
+  <text x="190" y="160" font-family="Georgia, serif" font-size="13.5" fill="#1e293b">En el mundo actual, la inteligencia artificial desempena un papel crucial en la transformacion</text>
+  <text x="190" y="180" font-family="Georgia, serif" font-size="13.5" fill="#1e293b">digital de nuestra sociedad. En constante evolucion, este avance tecnologico representa un sinfin</text>
+  <text x="190" y="200" font-family="Georgia, serif" font-size="13.5" fill="#1e293b">de oportunidades que estan redefiniendo como interactuamos con el conocimiento academico.</text>
+  
+  <!-- Badge over paragraph 1 -->
+  <rect x="680" y="142" width="95" height="20" rx="10" fill="#ef4444"/>
+  <text x="688" y="156" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" font-weight="bold" fill="#ffffff">ChatGPT ~88%</text>
+
+  <!-- Natural Human Paragraph -->
+  <text x="180" y="240" font-family="Georgia, serif" font-size="13.5" fill="#475569">Durante las sesiones de laboratorio en la Universidad de Valencia, los datos recopilados por</text>
+  <text x="180" y="260" font-family="Georgia, serif" font-size="13.5" fill="#475569">nuestro equipo demostraron una marcada dispersion en los tiempos de respuesta de los sujetos.</text>
+
+  <!-- Illuminated AI Paragraph 2 (Claude) -->
+  <rect x="175" y="280" width="610" height="75" rx="6" fill="rgba(245, 158, 11, 0.14)" stroke="#f59e0b" stroke-width="1.5"/>
+  <rect x="175" y="280" width="5" height="75" fill="#f59e0b" rx="2"/>
+  <text x="190" y="305" font-family="Georgia, serif" font-size="13.5" fill="#1e293b">Ciertamente, vale la pena considerar el impacto de estos modelos desde una perspectiva critica</text>
+  <text x="190" y="325" font-family="Georgia, serif" font-size="13.5" fill="#1e293b">y matizada. Un matiz importante es que los sesgos no surgen de forma aislada, sino que reflejan</text>
+  <text x="190" y="345" font-family="Georgia, serif" font-size="13.5" fill="#1e293b">directamente las asimetrias historicas presentes en los conjuntos de datos de entrenamiento.</text>
+
+  <!-- Badge over paragraph 2 -->
+  <rect x="690" y="287" width="85" height="20" rx="10" fill="#f59e0b"/>
+  <text x="698" y="301" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" font-weight="bold" fill="#ffffff">Claude ~80%</text>
+
+  <!-- Tooltip overlay on hover -->
+  <g filter="url(#tt-shadow)">
+    <rect x="360" y="320" width="340" height="200" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    
+    <text x="376" y="346" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13" font-weight="bold" fill="#0f172a">DocenteLens • Analisis</text>
+    <rect x="620" y="332" width="68" height="20" rx="6" fill="#fef3c7"/>
+    <text x="628" y="346" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" font-weight="bold" fill="#b45309">80% Prob.</text>
+
+    <!-- Model Attribution in Tooltip -->
+    <rect x="376" y="362" width="308" height="38" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="376" y="362" width="4" height="38" fill="#d97706" rx="2"/>
+    <circle cx="392" cy="381" r="5" fill="#d97706"/>
+    <text x="404" y="377" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11.5" font-weight="bold" fill="#0f172a">Anthropic (Claude 3.5) ~82% certeza</text>
+    <text x="404" y="391" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10" fill="#64748b">Trazabilidad: Marca estadistica EU AI Act Art. 50(2)</text>
+
+    <text x="376" y="418" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" fill="#334155">• Conectores reflexivos caracteristicos: &quot;ciertamente&quot;, &quot;un matiz importante&quot;</text>
+    <text x="376" y="434" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" fill="#334155">• Ausencia de hiperboles artificiales propias de otros modelos generativos</text>
+
+    <rect x="376" y="450" width="308" height="52" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="384" y="468" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10.5" font-weight="bold" fill="#1e40af">Orientacion docente:</text>
+    <text x="384" y="484" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10.5" fill="#1e3a8a">Muestra estilo reflexivo de IA. Dialogue con el alumno para evaluar</text>
+    <text x="384" y="496" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10.5" fill="#1e3a8a">su grado de autonomia en la construccion de los argumentos.</text>
+  </g>
+
+  <!-- Top HUD -->
+  <rect x="640" y="50" width="290" height="30" rx="15" fill="#0f172a" filter="url(#shadow-web)"/>
+  <circle cx="658" cy="65" r="4" fill="#10b981"/>
+  <text x="672" y="70" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">DocenteLens Activo • Iluminando con ⌘</text>
+</svg>

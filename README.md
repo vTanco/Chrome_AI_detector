@@ -1,114 +1,146 @@
-# 🎓 DocenteLens
+# DocenteLens
 
 > **Detector y resaltador visual de contenido generado por IA en tiempo real para educadores.**  
-> *100% gratuito, de código abierto, respetuoso con la privacidad del estudiante y diseñado específicamente para el ámbito pedagógico.*
+> Herramienta gratuita, de codigo abierto, respetuosa con la privacidad del estudiante y diseñada especificamente para el ambito pedagogico.
 
 ---
 
-## 🌟 ¿Qué es DocenteLens?
+## Descripcion General
 
-**DocenteLens** es una extensión para Google Chrome (Manifest V3) creada para que docentes, profesores y evaluadores académicos puedan identificar indicios de texto e imágenes generados mediante Inteligencia Artificial (ChatGPT, Claude, Gemini, Midjourney, DALL-E) **de forma instantánea y no destructiva**.
+DocenteLens es una extension para Google Chrome (Manifest V3) creada para que docentes, profesores y evaluadores academicos puedan identificar indicios de texto e imagenes generados mediante Inteligencia Artificial (OpenAI ChatGPT, Anthropic Claude, Google Gemini, Midjourney, DALL-E) de forma instantanea y no destructiva.
 
-A diferencia de los detectores de pago tradicionales basados en "cajas negras" que emiten porcentajes opacos sin explicación, DocenteLens:
-1. **Funciona bajo demanda ("Press-to-Illuminate"):** Al pulsar y mantener la tecla **`Comando ⌘`** (o `Ctrl` en otros sistemas), todas las partes del HTML generadas o asistidas por IA se iluminan de inmediato en la pantalla con un indicador visual (HUD) y métricas explicativas.
-2. **Restauración instantánea y limpia:** Al soltar la tecla, la página vuelve inmediatamente a su estado original sin alterar el diseño ni recargar el navegador.
-3. **100% Local y Privado:** No envía los trabajos de los estudiantes a ningún servidor externo. El procesamiento se realiza 100% en el navegador del docente.
-4. **Enfoque Pedagógico Transparente:** Muestra exactamente los factores analizados (varianza de longitud de oraciones o *burstiness*, densidad de clichés sintéticos, fórmulas rígidas) para fomentar una conversación formativa con el alumno en lugar de acusaciones infundadas.
+A diferencia de los detectores comerciales basados en sistemas cerrados que emiten porcentajes opacos sin explicacion:
+1. **Activacion bajo demanda ("Press-to-Illuminate"):** Al mantener pulsada la tecla **Comando** (en Mac) o **Control** (en Windows/Linux), todas las secciones generadas o asistidas por IA se iluminan de inmediato en la pantalla con un indicador visual y metricas explicativas.
+2. **Restauracion instantanea y limpia:** Al soltar la tecla, la pagina web o el documento vuelve de inmediato a su estado original sin alterar el diseño ni recargar el navegador.
+3. **Ejecucion 100% Local y Privada:** No envia los trabajos de los alumnos a ningun servidor externo. Todo el procesamiento se realiza en el navegador del docente.
+4. **Atribucion de Modelos y Explicabilidad:** Identifica que modelo de IA genero probablemente el texto y desglosa los factores analizados (cadencia ritmica de oraciones, densidad de conectores sinteticos y formulas rigidas) para fundamentar una conversacion formativa con el estudiante.
 
 ---
 
-## ⌨️ Modos de Activación
+## Capturas de Uso Real de la Herramienta
 
-Puedes seleccionar el disparador que mejor se adapte a tu preferencia desde el icono de la extensión:
+### 1. Evaluacion de Trabajos en Google Docs
 
-| Disparador | Recomendado para | Descripción |
+Inspeccion en tiempo real de parrafos dentro del editor de Google Docs mediante seleccion y pulsacion de la tecla Comando:
+
+![Inspeccion en Google Docs](docs/images/google_docs_inspection.svg)
+
+### 2. Iluminacion de Parrafos en Navegacion Web
+
+Visualizacion de bloques sinteticos iluminados con insignias de modelo (ChatGPT, Claude, Gemini) y tarjeta de desglose metrico:
+
+![Iluminacion en articulos web](docs/images/web_article_illumination.svg)
+
+### 3. Calificacion de Entregas en Google Classroom
+
+Integracion en el panel de calificacion de Google Classroom con ejecucion directa en los marcos de previsualizacion de tareas:
+
+![Calificacion en Google Classroom](docs/images/classroom_grading_view.svg)
+
+---
+
+## Integracion Nativa con Google Classroom y Google Docs
+
+DocenteLens ha sido diseñada teniendo en cuenta los flujos reales de correccion docente en el ecosistema de Google Workspace:
+
+### Google Classroom (classroom.google.com)
+- Opera en rubricas, comentarios privados, respuestas textuales directas de alumnos y paneles de calificacion.
+- Gracias a la configuracion de inyeccion en todos los marcos (`all_frames: true`), se activa automaticamente dentro de los marcos y visores de tareas entregadas por los alumnos.
+
+### Google Docs (docs.google.com)
+- Dado que Google Docs utiliza un motor de renderizado basado en lienzo (`canvas`), DocenteLens incorpora un controlador especializado:
+  - **Enlace de eventos de cursor (`docs-texteventtarget`):** Captura la pulsacion de la tecla Comando incluso cuando el cursor de edicion se encuentra activo dentro del documento.
+  - **Analisis por Seleccion o Documento Completo:** Seleccione cualquier parrafo con el raton o pulse `Cmd + A` para seleccionar todo el texto y mantenga presionada la tecla Comando.
+  - **Tarjeta Flotante de Inspeccion:** Despliega una tarjeta superior con el nivel de probabilidad, el modelo de IA atribuido y las recomendaciones formativas para la tutoria.
+
+---
+
+## Modos de Activacion
+
+El docente puede configurar el disparador de activacion desde el menu de la extension:
+
+| Disparador | Recomendado para | Descripcion |
 | :--- | :--- | :--- |
-| **`Tecla Comando ⌘`** *(Por defecto)* | **Mac (Teclado)** | Pulsa y mantén `Comando ⌘` para iluminar al instante las partes IA de la página. |
-| **`Alt / Option + Clic`** | **Trackpads** | Mantén pulsada la tecla `Alt`/`Option` y haz clic sostenido sobre la página. |
-| **`Botón Central (Rueda)`** | **Ratones de sobremesa** | Mantén pulsada la rueda del ratón hacia abajo para activar la lente. |
-| **`Clic Derecho sostenido`** | **Navegación con ratón** | Mantén pulsado el botón derecho (suprime el menú contextual mientras inspeccionas). |
-| **`Fijar Resaltado` (Pin)** | **Revisión prolongada** | Activa la iluminación continua en la pestaña activa con un solo clic. |
+| **Tecla Comando (Cmd)** *(Por defecto)* | **Mac (Teclado)** | Mantenga pulsada la tecla Comando para iluminar al instante el contenido IA. |
+| **Tecla Control (Ctrl)** | **Windows / Linux** | Mantenga pulsada la tecla Control para activar la iluminacion. |
+| **Alt / Option + Clic** | **Trackpads** | Mantenga pulsada la tecla Alt y haga clic sostenido sobre la pagina. |
+| **Boton Central (Rueda)** | **Ratones convencionales** | Mantenga pulsada la rueda del raton hacia abajo para activar la lente. |
+| **Clic Derecho sostenido** | **Navegacion con raton** | Mantenga pulsado el boton derecho (suprime el menu contextual durante la inspeccion). |
+| **Fijar Resaltado (Pin)** | **Revision continua** | Mantiene la iluminacion activa de forma permanente en la pestaña. |
 
 ---
 
-## 🏫 Integración Nativa con Google Classroom y Google Docs
+## Motor de Deteccion y Atribucion de Modelos
 
-DocenteLens ha sido adaptada especialmente para el ecosistema docente de Google:
+### 1. Analisis de Texto
+- **Varianza Ritmica (Burstiness):** Los textos humanos combinan oraciones breves con construcciones complejas (alto coeficiente de variacion, CV > 0.45). Los modelos de lenguaje artificial producen cadencias regulares y uniformes (CV < 0.28).
+- **Densidad de Marcadores Sinteticos:** Deteccion ponderada de conectores retoricos sobrerrepresentados en espanol e ingles (*"en conclusion"*, *"un tapiz de"*, *"desempeña un papel crucial"*, *"a medida que avanzamos"*, *"delve into"*, *"a testament to"*).
+- **Diversidad Lexica (Type-Token Ratio):** Medicion de la riqueza y dispersion de vocabulario.
+- **Estructuras Formulaicas:** Reconocimiento de esquemas de redaccion rigidos (introducciones tipicas, listas estructuradas con encabezados en negrita).
 
-1. **Google Classroom (`classroom.google.com`)**:
-   - Funciona en rúbricas, comentarios privados, respuestas directas de alumnos y paneles de calificación.
-   - Gracias a la inyección en todos los marcos (`all_frames: true`), se activa automáticamente dentro de las previsualizaciones y editores incrustados de tareas de los estudiantes.
+### 2. Atribucion de Modelos y Trazabilidad
+DocenteLens identifica patrones estilisticos propios del entrenamiento por refuerzo (RLHF) de cada desarrollador:
+- **OpenAI (ChatGPT / GPT-4o):** Deteccion de hiperboles sinteticas clasicas (*"faro de esperanza"*, *"piedra angular"*, *"hito significativo"*), formato de listas estructuradas y compatibilidad con metadatos C2PA de DALL-E 3.
+- **Anthropic (Claude 3 / 3.5):** Identificacion de giros reflexivos y conectores de matiz (*"ciertamente"*, *"vale la pena considerar"*, *"desde una perspectiva"*, *"un matiz importante"*), ausencia de clichés genericos de ChatGPT y seguimiento de marcas estadisticas alineadas con el EU AI Act (Art. 50(2)).
+- **Google (Gemini / Gemma):** Reconocimiento de sintesis ejecutivas (*"en pocas palabras"*, *"puntos clave a tener en cuenta"*), alineado con la tecnologia SynthID-Text de Google DeepMind.
 
-2. **Google Docs (`docs.google.com/document/...`)**:
-   - Dado que Google Docs utiliza renderizado en lienzo (`<canvas>`), DocenteLens incluye un controlador específico:
-     - **Enlace de eventos de cursor (`docs-texteventtarget`):** Captura la pulsación de la tecla `Comando ⌘` incluso cuando el cursor de edición está activo dentro del documento.
-     - **Análisis por Selección o Documento Completo:** Selecciona cualquier párrafo o pulsa `Cmd + A` para seleccionar todo el texto y mantén presionado `Comando ⌘`.
-     - **Tarjeta Flotante de Análisis:** Muestra una ventana de inspección superior con el porcentaje, la IA identificada (ChatGPT, Claude o Gemini) y las recomendaciones de evaluación.
-
----
-
-## 🔬 ¿Cómo funciona el Motor de Detección y Atribución de Modelos?
-
-### 1. Detección de Texto (Múltiples factores lingüísticos)
-- **Análisis de *Burstiness* (Cadencia rítmica):** Los textos humanos combinan oraciones muy breves con estructuras complejas (alto coeficiente de variación). Los modelos LLM producen longitudes de frase extremadamente uniformes y predecibles.
-- **Densidad de Marcadores y Clichés:** Detección ponderada de conectores y muletillas recurrentes en IA en español e inglés (*"en conclusión"*, *"un tapiz de"*, *"juega un papel fundamental"*, *"a medida que avanzamos"*, *"delve into"*, *"testament to"*).
-- **Diversidad Léxica (TTR):** Evaluación de la riqueza y dispersión de vocabulario.
-- **Estructuras formulaicas:** Reconocimiento de introducciones y cierres sintéticos estereotipados.
-
-### 2. Atribución de Modelos y Marcas de Agua (OpenAI, Anthropic y Google)
-DocenteLens no solo detecta si un texto es de IA, sino que **identifica qué modelo/empresa lo generó probablemente**:
-- **OpenAI (ChatGPT / GPT-4o):** Identifica clichés hiper-frecuentes de su alineación RLHF (*"un tapiz de"*, *"desempeña un papel crucial"*, *"delve"*, *"a testament to"*), estructura de listas con negritas y compatibilidad con marcas C2PA en DALL·E 3.
-- **Anthropic (Claude 3 / 3.5):** Reconoce su estilo reflexivo, conectores de matiz (*"ciertamente"*, *"vale la pena considerar"*, *"desde una perspectiva"*, *"un matiz importante"*), ausencia deliberada de clichés de ChatGPT y marcas estadísticas de agua acordes al **EU AI Act (Art. 50(2))**.
-- **Google (Gemini / DeepMind):** Identifica la estructura expositiva basada en síntesis y viñetas ejecutivas (*"en pocas palabras"*, *"a continuación te presento"*, *"puntos clave"*), alineada con la tecnología de marcas de agua **SynthID-Text** (logits con g-function pseudoaleatoria) y **SynthID** en imágenes (Imagen 3).
-
-### 3. Detección en Imágenes
-- **Metadatos e identificadores C2PA:** Rastreo de credenciales de autenticidad de contenido (`C2PA`, `Midjourney`, `DALL-E 3`, `Adobe Firefly`, `SynthID`).
-- **Orígenes de red:** Detección de URLs provenientes de servidores y CDNs de plataformas generativas.
-- **Geometría sintética:** Verificación de cuadrículas nativas habituales en modelos de difusión (1024x1024px, 512x512px sin metadatos EXIF fotográficos).
+### 3. Deteccion en Imagenes
+- **Metadatos C2PA y Credenciales de Contenido:** Rastreo de firmas digitales de procedencia (C2PA, SynthID, OpenAI, Midjourney, Adobe Firefly).
+- **Servidores de Origen:** Identificacion de URLs procedentes de servicios de generacion sintetica.
+- **Geometria de Exportacion:** Deteccion de cuadriculas nativas caracteristicas (1024x1024 px, 512x512 px) carentes de perfiles EXIF fotográficos tradicionales.
 
 ---
 
-## 🚀 Instalación en Google Chrome
+## Marcas de Agua e Identificadores por Compañia
 
-Al ser una extensión de código abierto sin intermediarios, puedes instalarla en menos de 1 minuto:
+DocenteLens incluye referencias a los estandares de trazabilidad de los principales laboratorios de IA:
 
-1. Clona o descarga esta carpeta en tu ordenador.
-2. Abre Google Chrome y navega a:
+- **Google DeepMind (SynthID):** Incorpora un algoritmo que aplica una funcion pseudo-aleatoria (g-function) durante el muestreo de tokens en modelos de texto y marcas imperceptibles en los pixeles de Imagen 3.
+- **OpenAI (C2PA + Muestreo de Tokens):** Integra credenciales criptograficas de procedencia C2PA en DALL-E 3 y sesgo estadistico en la seleccion de tokens para texto.
+- **Anthropic (Marcas EU AI Act + C2PA):** Aplica marcas estadisticas invisibles para cumplir con los requerimientos de transparencia de la normativa europea y firmas C2PA en archivos visuales.
+
+---
+
+## Instalacion en Google Chrome
+
+1. Descargue o clone este repositorio en su ordenador:
+   ```bash
+   git clone https://github.com/vTanco/Chrome_AI_detector.git
+   ```
+2. Abra Google Chrome y navegue a la direccion:
    ```
    chrome://extensions/
    ```
-3. En la esquina superior derecha, activa el interruptor **"Modo de desarrollador"** (Developer mode).
-4. Haz clic en el botón **"Cargar descomprimida"** (Load unpacked).
-5. Selecciona la carpeta `docente-ai-lens` de este proyecto.
-6. ¡Listo! Verás el icono del birrete 🎓 en la barra de herramientas de Chrome. Fíjalo para tenerlo siempre a mano.
+3. En la esquina superior derecha, active la casilla **Modo de desarrollador**.
+4. Haga clic en el boton **Cargar descomprimida**.
+5. Seleccione la carpeta del repositorio (`docente-ai-lens` o `Chrome_AI_detector`).
+6. Si desea evaluar archivos locales (`file:///...`), haga clic en **Detalles** dentro de la tarjeta de la extension y active **Permitir acceso a URLs de archivo**.
 
 ---
 
-## 🧪 Cómo Probar la Extensión
+## Entorno de Pruebas
 
-Hemos incluido una página de prueba con ejemplos reales de redacción humana frente a redacción de ChatGPT:
+El repositorio incluye un archivo de prueba con textos autenticos de estudiantes frente a textos generados por ChatGPT, Claude y Gemini:
 
-1. Abre el archivo [`test/sample_page.html`](file:///Users/vicentetanco/.gemini/antigravity/scratch/docente-ai-lens/test/sample_page.html) en tu navegador Chrome.
-2. Mantén presionada la tecla `Comando ⌘` (en Mac) o `Ctrl`.
-3. Observa cómo DocenteLens ilumina de inmediato las partes del HTML generadas con IA, dejando intacto el texto auténtico del alumno.
-4. Pasa el cursor por encima del texto iluminado para ver la tarjeta pedagógica interactiva.
-
----
-
-## ⚖️ Compromiso Ético para Educadores
-
-> **Nota pedagógica crucial:** Ningún algoritmo de detección de IA es infalible. Las herramientas probabilísticas pueden arrojar falsos positivos, en particular con estudiantes con estilos de redacción muy formales, estructurados o que no son hablantes nativos.
->
-> **DocenteLens está concebida como un instrumento de orientación y diálogo formativo**, no como un sistema punitivo o prueba concluyente para sancionar alumnos.
+1. Abra el archivo `test/sample_page.html` en Chrome.
+2. Mantenga pulsada la tecla **Comando** (en Mac) o **Control** (en Windows/Linux).
+3. Observe como los parrafos sinteticos se iluminan en tiempo real y sitúe el cursor sobre ellos para examinar la atribucion de modelo y los factores linguisticos.
 
 ---
 
-## 📁 Estructura del Proyecto
+## Compromiso Etico para Educadores
+
+Ningun algoritmo de deteccion de IA es infalible. Las herramientas probabilisticas pueden arrojar falsos positivos, en particular con estudiantes que emplean estilos de redaccion muy academicos, estructurados o que no son hablantes nativos.
+
+DocenteLens esta concebida como un instrumento de apoyo y orientacion formativa para abrir un dialogo constructivo con el alumnado, y nunca debe utilizarse como prueba concluyente para sancionar a un estudiante.
+
+---
+
+## Estructura del Repositorio
 
 ```
-docente-ai-lens/
-├── manifest.json            # Configuración Manifest V3 para Chrome
-├── popup/                   # Ventana emergente de control rápido
+├── manifest.json            # Configuracion Manifest V3 para Google Chrome
+├── popup/                   # Interfaz emergente de control rapido
 │   ├── popup.html
 │   ├── popup.css
 │   └── popup.js
@@ -116,25 +148,40 @@ docente-ai-lens/
 │   ├── options.html
 │   ├── options.css
 │   └── options.js
-├── content/                 # Lógica inyectada en la página web
-│   ├── content.js           # Manejador del ratón ("hold to highlight")
-│   └── content.css          # Estilos de resaltado y tooltips
+├── content/                 # Logica inyectada en paginas, Classroom y Google Docs
+│   ├── content.js           # Manejador de teclado, seleccion y DOM
+│   └── content.css          # Estilos de iluminacion, tarjetas y tooltips
 ├── background/              # Service Worker en segundo plano
 │   └── background.js
-├── lib/                     # Motores y heurísticas de detección
-│   ├── ai-text-detector.js  # Análisis de burstiness y métricas de texto
-│   ├── ai-image-detector.js # Análisis de metadatos e imágenes
-│   ├── heuristics-es.js     # Diccionario léxico en Español
-│   └── heuristics-en.js     # Diccionario léxico en Inglés
-├── icons/                   # Iconos de la extensión (16, 32, 48, 128)
-├── test/                    # Entorno de pruebas con ejemplos reales
-│   └── sample_page.html
-├── LICENSE                  # Licencia abierta MIT
+├── lib/                     # Motores analiticos
+│   ├── ai-model-profiler.js # Atribucion de laboratorios y marcas de agua
+│   ├── ai-text-detector.js  # Calculo de burstiness y metricas textuales
+│   ├── ai-image-detector.js # Inspeccion de metadatos e imagenes
+│   ├── heuristics-es.js     # Diccionario lexico en Espanol
+│   └── heuristics-en.js     # Diccionario lexico en Ingles
+├── docs/
+│   └── images/              # Capturas y diagramas de uso real
+│       ├── google_docs_inspection.svg
+│       ├── web_article_illumination.svg
+│       └── classroom_grading_view.svg
+├── icons/                   # Iconografia de la extension (16, 32, 48, 128)
+├── test/
+│   └── sample_page.html     # Banco de pruebas con casos comparativos
+├── LICENSE                  # Licencia de codigo abierto MIT
 └── README.md
 ```
 
 ---
 
-## 📄 Licencia
+## Personalizacion de Capturas
 
-Distribuido bajo la Licencia **MIT**. Consulta el archivo [`LICENSE`](file:///Users/vicentetanco/.gemini/antigravity/scratch/docente-ai-lens/LICENSE) para más detalles.
+Si desea sustituir los diagramas vectoriales de `docs/images/` por capturas de pantalla reales de su propio navegador:
+1. Tome las capturas en su navegador Chrome.
+2. Guarde los archivos dentro de la carpeta `docs/images/` con los mismos nombres (`google_docs_inspection.png`, `web_article_illumination.png`, etc.) o en formato SVG.
+3. Actualice las referencias en este archivo `README.md`.
+
+---
+
+## Licencia
+
+Este proyecto esta distribuido bajo los terminos de la Licencia **MIT**. Consulte el archivo `LICENSE` para obtener mas informacion.

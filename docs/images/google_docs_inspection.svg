@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.16"/>
+    </filter>
+    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000000" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- Background Browser Frame -->
+  <rect width="960" height="560" fill="#f8fafc" rx="8"/>
+  <rect width="960" height="42" fill="#e2e8f0" rx="8"/>
+  <circle cx="24" cy="21" r="6" fill="#ef4444"/>
+  <circle cx="44" cy="21" r="6" fill="#f59e0b"/>
+  <circle cx="64" cy="21" r="6" fill="#10b981"/>
+
+  <!-- URL Bar -->
+  <rect x="120" y="8" width="720" height="26" rx="6" fill="#ffffff"/>
+  <text x="140" y="25" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" fill="#475569">https://docs.google.com/document/d/1aBcD.../edit</text>
+
+  <!-- Google Docs Toolbar -->
+  <rect x="0" y="42" width="960" height="48" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="24" y="54" width="24" height="24" rx="4" fill="#1a73e8"/>
+  <text x="56" y="70" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Ensayo Filosofia - Garcia_Mateo</text>
+  <rect x="24" y="82" width="400" height="2" fill="#cbd5e1"/>
+
+  <!-- Document Paper Canvas -->
+  <rect x="180" y="110" width="600" height="430" fill="#ffffff" filter="url(#shadow)" rx="2"/>
+
+  <!-- Document Text Lines -->
+  <text x="230" y="150" font-family="Georgia, serif" font-size="18" font-weight="bold" fill="#0f172a">La etica frente a la automatizacion contemporanea</text>
+  
+  <!-- Human paragraph -->
+  <text x="230" y="185" font-family="Georgia, serif" font-size="13" fill="#475569">Al comenzar la investigacion en la biblioteca municipal, encontramos discrepancias</text>
+  <text x="230" y="205" font-family="Georgia, serif" font-size="13" fill="#475569">entre las actas del comite de bioetica de 2021 y las resoluciones de marzo de 2023.</text>
+
+  <!-- Selected AI Paragraph (Highlighted in Google Docs selection blue) -->
+  <rect x="226" y="228" width="508" height="68" fill="#c2e7ff" rx="2"/>
+  <text x="230" y="248" font-family="Georgia, serif" font-size="13" fill="#0b57d0">En conclusion, la inteligencia artificial sirve como un faro de esperanza y una piedra</text>
+  <text x="230" y="268" font-family="Georgia, serif" font-size="13" fill="#0b57d0">angular para resolver desafios complejos. En resumidas cuentas, su adopcion integral</text>
+  <text x="230" y="288" font-family="Georgia, serif" font-size="13" fill="#0b57d0">marca un antes y un despues en la historia contemporanea de la sociedad moderna.</text>
+
+  <!-- Rest of paper text -->
+  <text x="230" y="325" font-family="Georgia, serif" font-size="13" fill="#475569">Por el contrario, los cuestionarios aplicados a los 40 voluntarios mostraron dudas</text>
+  <text x="230" y="345" font-family="Georgia, serif" font-size="13" fill="#475569">evidentes respecto a quien asume la responsabilidad legal en decisiones clinicas.</text>
+
+  <!-- DocenteLens Floating Google Docs Card -->
+  <g filter="url(#card-shadow)">
+    <rect x="250" y="140" width="460" height="230" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+    <rect x="250" y="140" width="460" height="6" fill="#1a73e8" rx="3"/>
+    
+    <!-- Header -->
+    <text x="272" y="172" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13" font-weight="bold" fill="#1a73e8">Google Docs &amp; Classroom • Analisis DocenteLens</text>
+    <rect x="620" y="156" width="70" height="24" rx="12" fill="#fee2e2"/>
+    <text x="632" y="172" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#b91c1c">88% IA</text>
+
+    <!-- Model Attribution Box -->
+    <rect x="272" y="190" width="416" height="42" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <rect x="272" y="190" width="4" height="42" fill="#10a37f" rx="2"/>
+    <circle cx="292" cy="211" r="6" fill="#10a37f"/>
+    <text x="306" y="207" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#0f172a">OpenAI (ChatGPT / GPT-4o) ~85% certeza de estilo</text>
+    <text x="306" y="223" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" fill="#64748b">Trazabilidad: C2PA Metadata + Sesgo Estadistico de Tokens</text>
+
+    <!-- Indicators -->
+    <circle cx="280" cy="250" r="2.5" fill="#475569"/>
+    <text x="290" y="253" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11.5" fill="#334155">Clichés tipicos de OpenAI: &quot;en conclusion&quot;, &quot;faro de esperanza&quot;, &quot;piedra angular&quot;</text>
+    <circle cx="280" cy="270" r="2.5" fill="#475569"/>
+    <text x="290" y="273" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11.5" fill="#334155">Cadencia ritmica uniforme y predecible (CV: 0.22 vs 0.48 en texto humano)</text>
+
+    <!-- Pedagogical Advice Box -->
+    <rect x="272" y="295" width="416" height="55" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="282" y="315" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">Orientacion pedagogica para el docente:</text>
+    <text x="282" y="332" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" fill="#1e3a8a">El fragmento presenta marcadores sinteticos evidentes. Utilice este indicio para</text>
+    <text x="282" y="345" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" fill="#1e3a8a">dialogar con el estudiante sobre sus fuentes y borradores previos.</text>
+  </g>
+
+  <!-- Top Right HUD -->
+  <rect x="660" y="52" width="280" height="30" rx="15" fill="#0f172a" filter="url(#shadow)"/>
+  <circle cx="678" cy="67" r="4" fill="#10b981"/>
+  <text x="692" y="72" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11.5" font-weight="600" fill="#ffffff">DocenteLens Activo • Tecla Comando pulsada</text>
+</svg>
