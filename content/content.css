@@ -24,6 +24,25 @@
   animation: docentelens-illuminate 0.25s ease-out !important;
 }
 
+/* Iluminación específica por laboratorio IA en tarjetas y componentes */
+.docentelens-highlight-high-anthropic {
+  border-left: 6px solid #d97706 !important;
+  box-shadow: 0 0 25px rgba(217, 119, 6, 0.4) !important;
+  outline: 2px solid rgba(217, 119, 6, 0.5) !important;
+}
+
+.docentelens-highlight-high-google {
+  border-left: 6px solid #1a73e8 !important;
+  box-shadow: 0 0 25px rgba(26, 115, 232, 0.4) !important;
+  outline: 2px solid rgba(26, 115, 232, 0.5) !important;
+}
+
+.docentelens-highlight-high-openai {
+  border-left: 6px solid #10a37f !important;
+  box-shadow: 0 0 25px rgba(16, 163, 127, 0.4) !important;
+  outline: 2px solid rgba(16, 163, 127, 0.5) !important;
+}
+
 /* Resaltado de Imágenes Sintéticas */
 .docentelens-image-highlight {
   outline: 4px solid #8b5cf6 !important;

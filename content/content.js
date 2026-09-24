@@ -579,19 +579,26 @@
         const result = AITextDetector.analyze(text, state.sensitivity);
 
         if (result.eligible && result.level !== "none") {
-          const highlightClass = result.level === "high" ? "docentelens-highlight-high" : "docentelens-highlight-medium";
-          el.classList.add(highlightClass);
-
-          const badge = document.createElement("span");
-          badge.className = `docentelens-badge ${result.level === "high" ? "docentelens-badge-high" : "docentelens-badge-medium"}`;
+          let highlightClass = result.level === "high" ? "docentelens-highlight-high" : "docentelens-highlight-medium";
 
           let modelTag = "IA";
           if (result.modelAttribution) {
             const comp = result.modelAttribution.company || "";
-            if (comp === "OpenAI") modelTag = "ChatGPT";
-            else if (comp === "Anthropic") modelTag = "Claude";
-            else if (comp.includes("Google")) modelTag = "Gemini";
+            if (comp === "OpenAI") {
+              modelTag = "ChatGPT";
+              highlightClass += " docentelens-highlight-high-openai";
+            } else if (comp === "Anthropic") {
+              modelTag = "Claude";
+              highlightClass += " docentelens-highlight-high-anthropic";
+            } else if (comp.includes("Google")) {
+              modelTag = "Gemini";
+              highlightClass += " docentelens-highlight-high-google";
+            }
           }
+          el.className += " " + highlightClass;
+
+          const badge = document.createElement("span");
+          badge.className = `docentelens-badge ${result.level === "high" ? "docentelens-badge-high" : "docentelens-badge-medium"}`;
           badge.textContent = `${modelTag} ~${result.score}%`;
           el.appendChild(badge);
 
@@ -602,6 +609,14 @@
           state.highlightedElements.push({ element: el, badge });
         }
       });
+
+      const hudText = document.getElementById("docentelens-hud-text");
+      if (hudText && !isGoogleDocs) {
+        const count = state.highlightedElements.length;
+        if (count > 0) {
+          hudText.textContent = `DocenteLens Activo • ${count} ${count === 1 ? "elemento IA iluminado" : "elementos IA iluminados"} (⌘)`;
+        }
+      }
     }
 
     // C. Análisis de Imágenes
@@ -645,7 +660,10 @@
         "docentelens-gdocs-highlight",
         "docentelens-gdocs-highlight-anthropic",
         "docentelens-gdocs-highlight-google",
-        "docentelens-gdocs-highlight-openai"
+        "docentelens-gdocs-highlight-openai",
+        "docentelens-highlight-high-anthropic",
+        "docentelens-highlight-high-google",
+        "docentelens-highlight-high-openai"
       );
       if (badge && badge.parentNode) {
         badge.parentNode.removeChild(badge);
@@ -657,28 +675,91 @@
     state.highlightedElements = [];
   }
 
-  // Obtener elementos de texto relevantes para inspeccionar
-  function getInspectableTextElements() {
-    const rawElements = Array.from(
-      document.querySelectorAll(
-        "p, li, blockquote, dd, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment'], div[data-message-author], .MuiTypography-root, [aria-label]"
-      )
-    );
+  // Búsqueda inteligente de componentes educativos (rúbricas de Classroom, tarjetas de criterios, cajas de nivel)
+  function findClassroomRubricsAndCards() {
+    const cards = [];
 
-    const leafContainers = Array.from(document.querySelectorAll("div, section, td, [role='listitem']")).filter(container => {
-      if (container.querySelector("p, ul, ol, table, article, div")) return false;
+    // 1. Selectores directos de componentes de rúbrica en Google Classroom y plataformas LMS
+    const specificSelectors = [
+      '[data-criterion-id]',
+      '[data-rubric-id]',
+      '[class*="rubric" i]',
+      '[class*="criterion" i]',
+      '[aria-label*="rúbrica" i]',
+      '[aria-label*="rubric" i]',
+      'div[jscontroller][data-id]'
+    ];
+
+    try {
+      const elements = document.querySelectorAll(specificSelectors.join(","));
+      elements.forEach(el => {
+        const text = (el.innerText || "").trim();
+        if (text.length >= 25 && isElementInViewport(el)) {
+          cards.push(el);
+        }
+      });
+    } catch (e) {}
+
+    // 2. Búsqueda estructural por contenido de tarjetas de criterios y niveles (como en Classroom)
+    const potentialContainers = document.querySelectorAll('div, section, article, [role="region"], [role="listitem"]');
+    potentialContainers.forEach(container => {
+      if (container === document.body || container.children.length > 25) return;
       const text = (container.innerText || "").trim();
-      return text.length > 60;
+      if (text.length < 25 || text.length > 2500) return;
+
+      const hasPoints = /\b\d+\s*puntos?\b|\/\s*\d+/i.test(text);
+      const hasLevels = /\b(notable|sobresaliente|suficiente|insuficiente|sin hacer|excelente|muy bien|bien|regular|deficiente)\b/i.test(text);
+
+      if (hasPoints && hasLevels && isElementInViewport(container)) {
+        // Evitar seleccionar un contenedor padre si un hijo ya es una tarjeta completa de criterio
+        const hasChildCard = Array.from(container.children).some(child => {
+          const ct = (child.innerText || "").trim();
+          return /\b\d+\s*puntos?\b|\/\s*\d+/i.test(ct) && /\b(notable|sobresaliente|suficiente|insuficiente|sin hacer)\b/i.test(ct);
+        });
+
+        if (!hasChildCard) {
+          cards.push(container);
+        }
+      }
     });
 
-    const combined = [...new Set([...rawElements, ...leafContainers])];
+    return cards;
+  }
 
-    return combined.filter(el => {
+  // Obtener elementos de texto relevantes para inspeccionar
+  function getInspectableTextElements() {
+    const inspectable = [];
+
+    // 1. Google Classroom: Rúbricas y Tarjetas de Criterios
+    const rubricCards = findClassroomRubricsAndCards();
+    rubricCards.forEach(card => inspectable.push(card));
+
+    // 2. Elementos de texto estándar
+    const standardElements = Array.from(
+      document.querySelectorAll(
+        "p, blockquote, dd, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment'], div[data-message-author], .MuiTypography-root, [aria-label]"
+      )
+    );
+    standardElements.forEach(el => inspectable.push(el));
+
+    // 3. Contenedores de contenido educativo y bloques semánticos (instrucciones, tareas, celdas de nivel)
+    const contentBlocks = Array.from(
+      document.querySelectorAll(
+        "div[role='region'], div[role='article'], div[class*='instruction' i], div[class*='description' i], div[class*='assignment' i], div[class*='submission' i], div[class*='criterion' i], div[class*='rubric' i], div[class*='cell' i], div[class*='level' i], div[class*='card' i]"
+      )
+    );
+    contentBlocks.forEach(el => inspectable.push(el));
+
+    // 4. Desduplicar y filtrar elementos visibles con texto suficiente
+    const unique = [...new Set(inspectable)];
+
+    return unique.filter(el => {
       if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button, .docs-title-widget, .docs-menubar")) {
         return false;
       }
-      const text = el.innerText || "";
-      return text.trim().length > 45 && isElementInViewport(el);
+      const text = (el.innerText || "").trim();
+      const words = text.match(/[\p{L}\p{N}]+/gu) || [];
+      return words.length >= 10 && isElementInViewport(el);
     });
   }
 
