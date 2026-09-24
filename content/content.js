@@ -4,6 +4,9 @@
  */
 
 (function () {
+  if (window._docenteLensInitialized) return;
+  window._docenteLensInitialized = true;
+
   // Estado local y configuración por defecto
   const state = {
     isEnabled: true,
@@ -19,32 +22,40 @@
     gdocsCardElement: null
   };
 
-  // Cargar configuración guardada
-  chrome.storage.sync.get(
-    {
-      isEnabled: true,
-      triggerMode: "commandKey",
-      sensitivity: "balanced",
-      detectText: true,
-      detectImages: true
-    },
-    items => {
-      Object.assign(state, items);
+  // Cargar configuración guardada (con protección para iframes sandboxed o pruebas locales)
+  try {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
+      chrome.storage.sync.get(
+        {
+          isEnabled: true,
+          triggerMode: "commandKey",
+          sensitivity: "balanced",
+          detectText: true,
+          detectImages: true
+        },
+        items => {
+          Object.assign(state, items);
+          initUIElements();
+        }
+      );
+
+      // Escuchar cambios de configuración desde el popup
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === "sync") {
+          for (const [key, { newValue }] of Object.entries(changes)) {
+            state[key] = newValue;
+          }
+          if (!state.isEnabled && state.isHolding) {
+            clearHighlights();
+          }
+        }
+      });
+    } else {
       initUIElements();
     }
-  );
-
-  // Escuchar cambios de configuración desde el popup
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "sync") {
-      for (const [key, { newValue }] of Object.entries(changes)) {
-        state[key] = newValue;
-      }
-      if (!state.isEnabled && state.isHolding) {
-        clearHighlights();
-      }
-    }
-  });
+  } catch (e) {
+    initUIElements();
+  }
 
   // Inicializar contenedores de HUD y Tooltip
   function initUIElements() {
@@ -551,25 +562,27 @@
   }
 
   // Escuchar mensajes desde el popup (para toggle manual o fijado)
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "togglePinned") {
-      state.isPinned = !state.isPinned;
-      if (state.isPinned) {
-        showHUD();
-        scanAndHighlight();
-      } else {
-        hideHUD();
-        clearHighlights();
-        hideTooltip();
+  if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === "togglePinned") {
+        state.isPinned = !state.isPinned;
+        if (state.isPinned) {
+          showHUD();
+          scanAndHighlight();
+        } else {
+          hideHUD();
+          clearHighlights();
+          hideTooltip();
+        }
+        sendResponse({ isPinned: state.isPinned });
+      } else if (request.action === "getStatus") {
+        sendResponse({
+          isEnabled: state.isEnabled,
+          isPinned: state.isPinned,
+          highlightCount: state.highlightedElements.length
+        });
       }
-      sendResponse({ isPinned: state.isPinned });
-    } else if (request.action === "getStatus") {
-      sendResponse({
-        isEnabled: state.isEnabled,
-        isPinned: state.isPinned,
-        highlightCount: state.highlightedElements.length
-      });
-    }
-    return true;
-  });
+      return true;
+    });
+  }
 })();

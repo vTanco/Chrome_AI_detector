@@ -173,15 +173,6 @@ DocenteLens esta concebida como un instrumento de apoyo y orientacion formativa 
 
 ---
 
-## Personalizacion de Capturas
-
-Si desea sustituir los diagramas vectoriales de `docs/images/` por capturas de pantalla reales de su propio navegador:
-1. Tome las capturas en su navegador Chrome.
-2. Guarde los archivos dentro de la carpeta `docs/images/` con los mismos nombres (`google_docs_inspection.png`, `web_article_illumination.png`, etc.) o en formato SVG.
-3. Actualice las referencias en este archivo `README.md`.
-
----
-
 ## Licencia
 
 Este proyecto esta distribuido bajo los terminos de la Licencia **MIT**. Consulte el archivo `LICENSE` para obtener mas informacion.
