@@ -68,6 +68,16 @@
               <span id="res-score-badge" class="score-badge">0%</span>
               <strong id="res-level-text">Nivel detectado</strong>
             </div>
+
+            <!-- Atribución de Modelo y Marca de Agua en el Simulador -->
+            <div id="res-model-box" class="res-model-box" style="display: none;">
+              <span id="res-model-icon" class="res-model-icon">🤖</span>
+              <div>
+                <strong id="res-model-name">IA Detectada</strong>
+                <div id="res-watermark-info" class="res-watermark-info">Trazabilidad de procedencia</div>
+              </div>
+            </div>
+
             <ul id="res-indicators-list" class="res-list"></ul>
             <div id="res-pedagogy" class="pedagogy-advice-box"></div>
           </div>
@@ -92,6 +102,15 @@
             </ul>
           </div>
 
+          <div class="guide-item">
+            <h3>3. Marcas de Agua y Trazabilidad por Compañía</h3>
+            <ul>
+              <li><strong>Google DeepMind (SynthID):</strong> Introduce un sesgo pseudoaleatorio imperceptible en los logits durante el muestreo de tokens (publicado en <em>Nature</em>) y marcas de agua invisibles en los píxeles de Imagen 3.</li>
+              <li><strong>OpenAI (ChatGPT & DALL·E 3):</strong> Inserta credenciales criptográficas C2PA (Content Credentials) en imágenes y patrones estadísticos de tokens en generación textual.</li>
+              <li><strong>Anthropic (Claude):</strong> Implementa marcas estadísticas invisibles de texto para cumplir con el EU AI Act (Art. 50(2)) y metadatos C2PA en archivos generados.</li>
+            </ul>
+          </div>
+
           <div class="guide-item alert-box">
             <h3>⚖️ Recomendación Ética Fundamental</h3>
             <p><strong>Nunca califiques ni sanciones a un estudiante basándote únicamente en un detector.</strong> Utiliza esta herramienta como una lente exploratoria para dialogar con el estudiante y pedirle que explique su razonamiento o muestre sus borradores.</p>
@@ -103,6 +122,7 @@
 
   <script src="../lib/heuristics-es.js"></script>
   <script src="../lib/heuristics-en.js"></script>
+  <script src="../lib/ai-model-profiler.js"></script>
   <script src="../lib/ai-text-detector.js"></script>
   <script src="options.js"></script>
 </body>

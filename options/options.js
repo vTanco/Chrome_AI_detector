@@ -12,7 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const resScoreBadge = document.getElementById("res-score-badge");
   const resLevelText = document.getElementById("res-level-text");
   const resIndicatorsList = document.getElementById("res-indicators-list");
-  const resPedagogy = document.getElementById("res-pedagogy");
+  const resModelBox = document.getElementById("res-model-box");
+  const resModelIcon = document.getElementById("res-model-icon");
+  const resModelName = document.getElementById("res-model-name");
+  const resWatermarkInfo = document.getElementById("res-watermark-info");
 
   // Cargar preferencias actuales
   chrome.storage.sync.get(
@@ -73,9 +76,39 @@ document.addEventListener("DOMContentLoaded", () => {
       resLevelText.textContent = "Estilo de redacción orgánico o humano";
     }
 
+    // Mostrar atribución de modelo
+    if (result.modelAttribution && resModelBox) {
+      resModelBox.style.display = "flex";
+      const ma = result.modelAttribution;
+      resModelName.textContent = `${ma.predictedModel} (~${ma.confidence}% certeza de estilo)`;
+      resWatermarkInfo.textContent = `Trazabilidad: ${ma.watermarkInfo}`;
+      resModelBox.style.borderLeftColor = ma.color;
+
+      if (ma.company === "OpenAI") {
+        resModelIcon.textContent = "🟢";
+      } else if (ma.company === "Anthropic") {
+        resModelIcon.textContent = "🟠";
+      } else if (ma.company === "Google DeepMind" || ma.company === "Google") {
+        resModelIcon.textContent = "🔵";
+      } else {
+        resModelIcon.textContent = "🤖";
+      }
+    } else if (resModelBox) {
+      resModelBox.style.display = "none";
+    }
+
     resIndicatorsList.innerHTML = "";
-    if (result.indicators && result.indicators.length > 0) {
-      result.indicators.forEach(ind => {
+    const allIndicators = [...(result.indicators || [])];
+    if (result.modelAttribution?.detectedFeatures) {
+      result.modelAttribution.detectedFeatures.forEach(feat => {
+        if (!allIndicators.includes(feat)) {
+          allIndicators.unshift(feat);
+        }
+      });
+    }
+
+    if (allIndicators.length > 0) {
+      allIndicators.forEach(ind => {
         const li = document.createElement("li");
         li.textContent = ind;
         resIndicatorsList.appendChild(li);

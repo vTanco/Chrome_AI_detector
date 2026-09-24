@@ -31,7 +31,7 @@ Puedes seleccionar el disparador que mejor se adapte a tu preferencia desde el i
 
 ---
 
-## 🔬 ¿Cómo funciona el Motor de Detección?
+## 🔬 ¿Cómo funciona el Motor de Detección y Atribución de Modelos?
 
 ### 1. Detección de Texto (Múltiples factores lingüísticos)
 - **Análisis de *Burstiness* (Cadencia rítmica):** Los textos humanos combinan oraciones muy breves con estructuras complejas (alto coeficiente de variación). Los modelos LLM producen longitudes de frase extremadamente uniformes y predecibles.
@@ -39,8 +39,14 @@ Puedes seleccionar el disparador que mejor se adapte a tu preferencia desde el i
 - **Diversidad Léxica (TTR):** Evaluación de la riqueza y dispersión de vocabulario.
 - **Estructuras formulaicas:** Reconocimiento de introducciones y cierres sintéticos estereotipados.
 
-### 2. Detección en Imágenes
-- **Metadatos e identificadores:** Rastreo de etiquetas de procedencia sintética (`C2PA`, `Midjourney`, `DALL-E`, `Adobe Firefly`, `Stable Diffusion`).
+### 2. Atribución de Modelos y Marcas de Agua (OpenAI, Anthropic y Google)
+DocenteLens no solo detecta si un texto es de IA, sino que **identifica qué modelo/empresa lo generó probablemente**:
+- **OpenAI (ChatGPT / GPT-4o):** Identifica clichés hiper-frecuentes de su alineación RLHF (*"un tapiz de"*, *"desempeña un papel crucial"*, *"delve"*, *"a testament to"*), estructura de listas con negritas y compatibilidad con marcas C2PA en DALL·E 3.
+- **Anthropic (Claude 3 / 3.5):** Reconoce su estilo reflexivo, conectores de matiz (*"ciertamente"*, *"vale la pena considerar"*, *"desde una perspectiva"*, *"un matiz importante"*), ausencia deliberada de clichés de ChatGPT y marcas estadísticas de agua acordes al **EU AI Act (Art. 50(2))**.
+- **Google (Gemini / DeepMind):** Identifica la estructura expositiva basada en síntesis y viñetas ejecutivas (*"en pocas palabras"*, *"a continuación te presento"*, *"puntos clave"*), alineada con la tecnología de marcas de agua **SynthID-Text** (logits con g-function pseudoaleatoria) y **SynthID** en imágenes (Imagen 3).
+
+### 3. Detección en Imágenes
+- **Metadatos e identificadores C2PA:** Rastreo de credenciales de autenticidad de contenido (`C2PA`, `Midjourney`, `DALL-E 3`, `Adobe Firefly`, `SynthID`).
 - **Orígenes de red:** Detección de URLs provenientes de servidores y CDNs de plataformas generativas.
 - **Geometría sintética:** Verificación de cuadrículas nativas habituales en modelos de difusión (1024x1024px, 512x512px sin metadatos EXIF fotográficos).
 

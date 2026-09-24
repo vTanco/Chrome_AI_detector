@@ -139,7 +139,7 @@
 #docentelens-tooltip {
   position: absolute !important;
   z-index: 2147483647 !important;
-  width: 320px !important;
+  width: 340px !important;
   background: #ffffff !important;
   color: #1f2937 !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -184,6 +184,42 @@
 #docentelens-tooltip .tt-score-medium {
   background: #fef3c7 !important;
   color: #b45309 !important;
+}
+
+/* Caja de Atribución del Modelo de IA */
+#docentelens-tooltip .tt-model-attribution {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-left: 4px solid #2563eb !important;
+  border-radius: 8px !important;
+  padding: 8px 10px !important;
+  margin-bottom: 10px !important;
+}
+
+#docentelens-tooltip .tt-model-icon {
+  font-size: 20px !important;
+  flex-shrink: 0 !important;
+}
+
+#docentelens-tooltip .tt-model-info {
+  display: flex !important;
+  flex-direction: column !important;
+  line-height: 1.25 !important;
+}
+
+#docentelens-tooltip .tt-model-info strong {
+  font-size: 12.5px !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+#docentelens-tooltip .tt-model-info small {
+  font-size: 11px !important;
+  color: #64748b !important;
+  margin-top: 2px !important;
 }
 
 #docentelens-tooltip .tt-factors {

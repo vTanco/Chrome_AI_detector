@@ -34,6 +34,7 @@ chrome.runtime.onInstalled.addListener(() => {
           files: [
             "lib/heuristics-es.js",
             "lib/heuristics-en.js",
+            "lib/ai-model-profiler.js",
             "lib/ai-text-detector.js",
             "lib/ai-image-detector.js",
             "content/content.js"

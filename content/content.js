@@ -59,6 +59,14 @@
             <span class="tt-title">DocenteLens • Análisis</span>
             <span class="tt-score" id="tt-score-badge">0%</span>
           </div>
+          <!-- Atribución de Modelo / Compañía y Marca de Agua -->
+          <div class="tt-model-attribution" id="tt-model-box">
+            <span class="tt-model-icon" id="tt-model-icon">🤖</span>
+            <div class="tt-model-info">
+              <strong id="tt-model-name">Identificando modelo...</strong>
+              <small id="tt-watermark-desc">Marcas de agua e indicios de procedencia</small>
+            </div>
+          </div>
           <div id="tt-content">
             <ul class="tt-factors" id="tt-factors-list"></ul>
           </div>
@@ -207,10 +215,17 @@
           const highlightClass = result.level === "high" ? "docentelens-highlight-high" : "docentelens-highlight-medium";
           el.classList.add(highlightClass);
 
-          // Crear badge informativo
+          // Crear badge informativo con atribución de modelo
           const badge = document.createElement("span");
           badge.className = `docentelens-badge ${result.level === "high" ? "docentelens-badge-high" : "docentelens-badge-medium"}`;
-          badge.textContent = `IA ~${result.score}%`;
+          
+          let modelTag = "IA";
+          if (result.modelAttribution) {
+            if (result.modelAttribution.company === "OpenAI") modelTag = "ChatGPT";
+            else if (result.modelAttribution.company === "Anthropic") modelTag = "Claude";
+            else if (result.modelAttribution.company === "Google DeepMind" || result.modelAttribution.company === "Google") modelTag = "Gemini";
+          }
+          badge.textContent = `${modelTag} ~${result.score}%`;
           el.appendChild(badge);
 
           // Guardar metadatos para tooltip interactivo
@@ -236,6 +251,7 @@
             score: result.score,
             level: "image",
             indicators: result.reasons,
+            modelAttribution: result.modelAttribution,
             pedagogicalAdvice: result.pedagogicalAdvice
           };
           img.addEventListener("mouseenter", onElementMouseEnter);
@@ -312,12 +328,52 @@
     const scoreBadge = document.getElementById("tt-score-badge");
     const factorsList = document.getElementById("tt-factors-list");
     const pedagogyText = document.getElementById("tt-pedagogy-text");
+    const modelBox = document.getElementById("tt-model-box");
+    const modelName = document.getElementById("tt-model-name");
+    const watermarkDesc = document.getElementById("tt-watermark-desc");
+    const modelIcon = document.getElementById("tt-model-icon");
 
     scoreBadge.textContent = `${data.score}% Probabilidad`;
     scoreBadge.className = `tt-score ${data.level === "high" ? "tt-score-high" : "tt-score-medium"}`;
 
+    // Mostrar atribución de modelo y marca de agua
+    if (data.modelAttribution && modelBox) {
+      modelBox.style.display = "flex";
+      const ma = data.modelAttribution;
+      const mName = ma.predictedModel || ma.model || "Modelo IA";
+      const mConf = ma.confidence ? ` (~${ma.confidence}%)` : "";
+      modelName.textContent = `${mName}${mConf}`;
+      watermarkDesc.textContent = ma.watermarkInfo || ma.watermark || "Firma estadística de tokens";
+      modelBox.style.borderLeftColor = ma.color || "#2563eb";
+
+      if (ma.company === "OpenAI") {
+        modelIcon.textContent = "🟢";
+      } else if (ma.company === "Anthropic") {
+        modelIcon.textContent = "🟠";
+      } else if (ma.company === "Google DeepMind" || ma.company === "Google") {
+        modelIcon.textContent = "🔵";
+      } else if (ma.company === "Midjourney") {
+        modelIcon.textContent = "🟣";
+      } else if (ma.company === "Adobe") {
+        modelIcon.textContent = "🔴";
+      } else {
+        modelIcon.textContent = "🤖";
+      }
+    } else if (modelBox) {
+      modelBox.style.display = "none";
+    }
+
     factorsList.innerHTML = "";
-    (data.indicators || []).forEach(factor => {
+    const allIndicators = [...(data.indicators || [])];
+    if (data.modelAttribution?.detectedFeatures) {
+      data.modelAttribution.detectedFeatures.forEach(feat => {
+        if (!allIndicators.includes(feat)) {
+          allIndicators.unshift(feat);
+        }
+      });
+    }
+
+    allIndicators.forEach(factor => {
       const li = document.createElement("li");
       li.textContent = factor;
       factorsList.appendChild(li);
@@ -330,7 +386,7 @@
     const scrollX = window.scrollX || document.documentElement.scrollLeft;
 
     state.tooltipElement.style.top = `${rect.bottom + scrollY + 8}px`;
-    state.tooltipElement.style.left = `${Math.min(rect.left + scrollX, window.innerWidth - 340)}px`;
+    state.tooltipElement.style.left = `${Math.min(rect.left + scrollX, window.innerWidth - 350)}px`;
     state.tooltipElement.style.display = "block";
   }
 
