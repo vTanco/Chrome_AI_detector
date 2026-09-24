@@ -7,10 +7,13 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "cookies",
+    "clipboardRead"
   ],
   "host_permissions": [
     "*://docs.google.com/*",
+    "*://*.googleusercontent.com/*",
     "*://classroom.google.com/*",
     "<all_urls>"
   ],

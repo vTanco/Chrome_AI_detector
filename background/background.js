@@ -56,19 +56,29 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message && message.type === "DOCENTELENS_FETCH_GDOCS_EXPORT" && message.docId) {
     const exportUrl = `https://docs.google.com/document/d/${message.docId}/export?format=txt`;
-    fetch(exportUrl, { credentials: "include" })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        return res.text();
-      })
-      .then(text => {
-        sendResponse({ ok: true, text: text || "" });
-      })
-      .catch(err => {
-        sendResponse({ ok: false, error: err.message });
-      });
+
+    const performFetch = () => {
+      fetch(exportUrl, { credentials: "include" })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+          return res.text();
+        })
+        .then(text => {
+          // Si Google devuelve una página HTML, es un inicio de sesión o un error
+          if (!text || text.includes("<!DOCTYPE") || text.includes("<html") || text.includes("ServiceLogin") || text.includes("accounts.google.com")) {
+            sendResponse({ ok: false, error: "Documento privado o requiere sincronización" });
+          } else {
+            sendResponse({ ok: true, text });
+          }
+        })
+        .catch(err => {
+          sendResponse({ ok: false, error: err.message });
+        });
+    };
+
+    performFetch();
     return true; // Mantener canal abierto para respuesta asíncrona
   }
 });
