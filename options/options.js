@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cargar preferencias actuales
   chrome.storage.sync.get(
     {
-      triggerMode: "altClick",
+      triggerMode: "commandKey",
       sensitivity: "balanced",
       detectText: true,
       detectImages: true

@@ -25,19 +25,20 @@
 
     <!-- Quick Trigger Action Status -->
     <div class="trigger-banner" id="trigger-instruction">
-      <span class="trigger-icon">🖱️</span>
+      <span class="trigger-icon">⌨️</span>
       <div class="trigger-text">
         <strong>Acción rápida:</strong>
-        <span id="current-trigger-desc">Mantén presionado <code>Alt + Clic</code></span>
+        <span id="current-trigger-desc">Mantén presionada la tecla <code>Comando ⌘</code></span>
       </div>
     </div>
 
     <!-- Main Controls -->
     <section class="section">
-      <label class="section-label" for="select-trigger">Disparador del Ratón</label>
+      <label class="section-label" for="select-trigger">Disparador de Activación</label>
       <select id="select-trigger" class="select-control">
-        <option value="altClick">Alt / Option + Clic sostenido (Mac / Trackpad)</option>
-        <option value="middleClick">Rueda del ratón (Botón central sostenido)</option>
+        <option value="commandKey" selected>Tecla Comando ⌘ (Mac) / Ctrl</option>
+        <option value="altClick">Alt / Option + Clic sostenido</option>
+        <option value="middleClick">Rueda del ratón (Botón central)</option>
         <option value="rightClick">Clic derecho sostenido</option>
       </select>
     </section>

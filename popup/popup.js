@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentTriggerDesc = document.getElementById("current-trigger-desc");
 
   const triggerLabels = {
+    commandKey: "Mantén presionada la tecla <code>Comando ⌘</code> (o Ctrl)",
     altClick: "Mantén presionado <code>Alt + Clic</code>",
     middleClick: "Mantén presionado el <code>Botón central (Rueda)</code>",
     rightClick: "Mantén presionado el <code>Clic derecho</code>"
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   chrome.storage.sync.get(
     {
       isEnabled: true,
-      triggerMode: "altClick",
+      triggerMode: "commandKey",
       sensitivity: "balanced",
       detectText: true,
       detectImages: true

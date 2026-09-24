@@ -10,23 +10,24 @@
 **DocenteLens** es una extensión para Google Chrome (Manifest V3) creada para que docentes, profesores y evaluadores académicos puedan identificar indicios de texto e imágenes generados mediante Inteligencia Artificial (ChatGPT, Claude, Gemini, Midjourney, DALL-E) **de forma instantánea y no destructiva**.
 
 A diferencia de los detectores de pago tradicionales basados en "cajas negras" que emiten porcentajes opacos sin explicación, DocenteLens:
-1. **Funciona bajo demanda ("Hold-to-Highlight"):** Mientras mantienes pulsada una combinación del ratón (por defecto `Alt + Clic` o el botón central de la rueda), los párrafos e imágenes sospechosos se iluminan en la pantalla con un indicador de confianza y métricas explicativas.
-2. **Restauración instantánea y limpia:** Al soltar el ratón o la tecla, la página vuelve inmediatamente a su estado original sin alterar el diseño ni recargar el navegador.
+1. **Funciona bajo demanda ("Press-to-Illuminate"):** Al pulsar y mantener la tecla **`Comando ⌘`** (o `Ctrl` en otros sistemas), todas las partes del HTML generadas o asistidas por IA se iluminan de inmediato en la pantalla con un indicador visual (HUD) y métricas explicativas.
+2. **Restauración instantánea y limpia:** Al soltar la tecla, la página vuelve inmediatamente a su estado original sin alterar el diseño ni recargar el navegador.
 3. **100% Local y Privado:** No envía los trabajos de los estudiantes a ningún servidor externo. El procesamiento se realiza 100% en el navegador del docente.
 4. **Enfoque Pedagógico Transparente:** Muestra exactamente los factores analizados (varianza de longitud de oraciones o *burstiness*, densidad de clichés sintéticos, fórmulas rígidas) para fomentar una conversación formativa con el alumno en lugar de acusaciones infundadas.
 
 ---
 
-## 🖱️ Modos de Activación con el Ratón
+## ⌨️ Modos de Activación
 
-Puedes seleccionar el disparador que mejor se adapte a tu forma de trabajar desde el icono de la extensión:
+Puedes seleccionar el disparador que mejor se adapte a tu preferencia desde el icono de la extensión:
 
-| Disparador | Ideal para | Descripción |
+| Disparador | Recomendado para | Descripción |
 | :--- | :--- | :--- |
-| **`Alt / Option + Clic`** *(Por defecto)* | **Mac y Trackpads** | Mantén pulsada la tecla `Alt`/`Option` y haz clic sostenido sobre la página. |
+| **`Tecla Comando ⌘`** *(Por defecto)* | **Mac (Teclado)** | Pulsa y mantén `Comando ⌘` para iluminar al instante las partes IA de la página. |
+| **`Alt / Option + Clic`** | **Trackpads** | Mantén pulsada la tecla `Alt`/`Option` y haz clic sostenido sobre la página. |
 | **`Botón Central (Rueda)`** | **Ratones de sobremesa** | Mantén pulsada la rueda del ratón hacia abajo para activar la lente. |
-| **`Clic Derecho sostenido`** | **Navegación con ratón estándar** | Mantén pulsado el botón derecho (suprime el menú contextual mientras inspeccionas). |
-| **`Fijar Resaltado` (Pin)** | **Revisión prolongada** | Activa el resaltado de forma continua en la pestaña activa con un solo clic. |
+| **`Clic Derecho sostenido`** | **Navegación con ratón** | Mantén pulsado el botón derecho (suprime el menú contextual mientras inspeccionas). |
+| **`Fijar Resaltado` (Pin)** | **Revisión prolongada** | Activa la iluminación continua en la pestaña activa con un solo clic. |
 
 ---
 
@@ -66,9 +67,9 @@ Al ser una extensión de código abierto sin intermediarios, puedes instalarla e
 Hemos incluido una página de prueba con ejemplos reales de redacción humana frente a redacción de ChatGPT:
 
 1. Abre el archivo [`test/sample_page.html`](file:///Users/vicentetanco/.gemini/antigravity/scratch/docente-ai-lens/test/sample_page.html) en tu navegador Chrome.
-2. Mantén presionado `Alt + Clic izquierdo` (o el botón central del ratón).
-3. Observa cómo DocenteLens detecta y resalta el ensayo generado con IA, dejando intacto el texto auténtico del alumno.
-4. Pasa el cursor por encima del texto resaltado para ver la tarjeta pedagógica interactiva.
+2. Mantén presionada la tecla `Comando ⌘` (en Mac) o `Ctrl`.
+3. Observa cómo DocenteLens ilumina de inmediato las partes del HTML generadas con IA, dejando intacto el texto auténtico del alumno.
+4. Pasa el cursor por encima del texto iluminado para ver la tarjeta pedagógica interactiva.
 
 ---
 

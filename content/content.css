@@ -3,32 +3,46 @@
 /* Resaltado de Texto con Alta Probabilidad de IA */
 .docentelens-highlight-high {
   position: relative !important;
-  background-color: rgba(239, 68, 68, 0.12) !important;
-  border-left: 4px solid #ef4444 !important;
-  border-radius: 4px !important;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.15) !important;
-  transition: all 0.2s ease-in-out !important;
+  background-color: rgba(239, 68, 68, 0.16) !important;
+  border-left: 5px solid #ef4444 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.3) !important;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
   cursor: help !important;
+  animation: docentelens-illuminate 0.25s ease-out !important;
 }
 
 /* Resaltado de Texto con Probabilidad Media de IA */
 .docentelens-highlight-medium {
   position: relative !important;
-  background-color: rgba(245, 158, 11, 0.12) !important;
-  border-left: 4px solid #f59e0b !important;
-  border-radius: 4px !important;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15) !important;
-  transition: all 0.2s ease-in-out !important;
+  background-color: rgba(245, 158, 11, 0.16) !important;
+  border-left: 5px solid #f59e0b !important;
+  border-radius: 6px !important;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.3) !important;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
   cursor: help !important;
+  animation: docentelens-illuminate 0.25s ease-out !important;
 }
 
 /* Resaltado de Imágenes Sintéticas */
 .docentelens-image-highlight {
-  outline: 3px solid #8b5cf6 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 16px rgba(139, 92, 246, 0.4) !important;
-  transition: all 0.2s ease-in-out !important;
+  outline: 4px solid #8b5cf6 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 22px rgba(139, 92, 246, 0.45) !important;
+  transition: all 0.18s ease-in-out !important;
   cursor: help !important;
+  animation: docentelens-illuminate 0.25s ease-out !important;
+}
+
+@keyframes docentelens-illuminate {
+  0% {
+    filter: brightness(1.35);
+    transform: scale(0.995);
+  }
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
 }
 
 /* Insignia visual sobre elementos */

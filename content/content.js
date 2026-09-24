@@ -7,7 +7,7 @@
   // Estado local y configuración por defecto
   const state = {
     isEnabled: true,
-    triggerMode: "altClick", // "altClick" (recomendado para Mac), "middleClick", "rightClick", "pinned"
+    triggerMode: "commandKey", // "commandKey" (Tecla Comando ⌘ en Mac / Ctrl), "altClick", "middleClick", "rightClick", "pinned"
     sensitivity: "balanced",
     detectText: true,
     detectImages: true,
@@ -22,7 +22,7 @@
   chrome.storage.sync.get(
     {
       isEnabled: true,
-      triggerMode: "altClick",
+      triggerMode: "commandKey",
       sensitivity: "balanced",
       detectText: true,
       detectImages: true
@@ -76,36 +76,75 @@
       hud.style.display = "none";
       hud.innerHTML = `
         <span class="hud-pulse"></span>
-        <span>DocenteLens Activo • Resaltando contenido IA</span>
+        <span>DocenteLens Activo • Iluminando contenido IA (⌘)</span>
       `;
       document.body.appendChild(hud);
       state.hudElement = hud;
     }
   }
 
-  // Comprobar si el evento de ratón coincide con el disparador configurado
-  function matchesTrigger(e) {
+  // Comprobar si es la tecla Comando (⌘ en Mac) o Control
+  function isCommandKey(e) {
+    const isMac = (navigator.platform || "").toUpperCase().indexOf("MAC") >= 0;
+    if (isMac) {
+      return e.key === "Meta" || e.code === "MetaLeft" || e.code === "MetaRight";
+    } else {
+      return e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight";
+    }
+  }
+
+  // Comprobar si el evento de ratón coincide con el disparador (si está en modo ratón)
+  function matchesMouseTrigger(e) {
     if (!state.isEnabled) return false;
 
     switch (state.triggerMode) {
       case "middleClick":
         return e.button === 1; // Clic en la rueda
       case "altClick":
-        return e.altKey && e.button === 0; // Alt / Option + Clic izquierdo (Ideal en Mac)
+        return e.altKey && e.button === 0; // Alt / Option + Clic izquierdo
       case "rightClick":
         return e.button === 2; // Clic derecho
-      case "pinned":
-        return false; // El modo fijado se activa con toggle
       default:
-        return e.altKey && e.button === 0;
+        return false;
     }
   }
 
-  // Evento Mousedown: Iniciar escaneo y resaltado mientras se mantenga presionado
+  // Evento Keydown: Iluminar contenido generado por IA al pulsar la tecla Comando ⌘
+  window.addEventListener(
+    "keydown",
+    e => {
+      if (!state.isEnabled) return;
+      if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+        if (e.repeat) return; // Evitar disparos repetidos mientras se mantiene presionada
+        state.isHolding = true;
+        showHUD();
+        scanAndHighlight();
+      }
+    },
+    true
+  );
+
+  // Evento Keyup: Al soltar la tecla Comando ⌘, restaurar la página
+  window.addEventListener(
+    "keyup",
+    e => {
+      if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+        if (state.isHolding && !state.isPinned) {
+          state.isHolding = false;
+          hideHUD();
+          clearHighlights();
+          hideTooltip();
+        }
+      }
+    },
+    true
+  );
+
+  // Evento Mousedown: Si está configurado en modo ratón
   window.addEventListener(
     "mousedown",
     e => {
-      if (matchesTrigger(e)) {
+      if (matchesMouseTrigger(e)) {
         if (state.triggerMode === "rightClick" || state.triggerMode === "middleClick") {
           e.preventDefault();
         }
@@ -117,11 +156,11 @@
     true
   );
 
-  // Evento Mouseup: Al soltar la tecla del ratón, restaurar la página original
+  // Evento Mouseup: Restaurar si se usa disparador de ratón
   window.addEventListener(
     "mouseup",
     e => {
-      if (state.isHolding && !state.isPinned) {
+      if (state.triggerMode !== "commandKey" && state.isHolding && !state.isPinned) {
         state.isHolding = false;
         hideHUD();
         clearHighlights();

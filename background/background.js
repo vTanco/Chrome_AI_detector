@@ -7,7 +7,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.get(["isEnabled", "triggerMode", "sensitivity", "detectText", "detectImages"], (res) => {
     const defaults = {
       isEnabled: true,
-      triggerMode: "altClick", // Alt + Clic sostenido por defecto (funciona perfecto en Mac y ratón)
+      triggerMode: "commandKey", // Tecla Comando ⌘ por defecto (ilumina el contenido IA al pulsar)
       sensitivity: "balanced",
       detectText: true,
       detectImages: true
