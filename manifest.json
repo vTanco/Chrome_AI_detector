@@ -31,6 +31,7 @@
     {
       "matches": ["<all_urls>"],
       "all_frames": true,
+      "match_origin_as_fallback": true,
       "match_about_blank": true,
       "js": [
         "lib/heuristics-es.js",
@@ -42,6 +43,18 @@
       ],
       "css": ["content/content.css"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://docs.google.com/*"],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "js": ["content/gdocs-canvas-bridge.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["content/gdocs-canvas-bridge.js"],
+      "matches": ["*://docs.google.com/*"]
     }
   ],
   "icons": {

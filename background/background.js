@@ -51,3 +51,24 @@ chrome.runtime.onInstalled.addListener(() => {
 
   console.log("DocenteLens instalado e inyectado en pestañas activas.");
 });
+
+// Canal de exportación de Google Docs: el service worker de fondo no está sujeto a las restricciones de CORS de la página
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message && message.type === "DOCENTELENS_FETCH_GDOCS_EXPORT" && message.docId) {
+    const exportUrl = `https://docs.google.com/document/d/${message.docId}/export?format=txt`;
+    fetch(exportUrl, { credentials: "include" })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return res.text();
+      })
+      .then(text => {
+        sendResponse({ ok: true, text: text || "" });
+      })
+      .catch(err => {
+        sendResponse({ ok: false, error: err.message });
+      });
+    return true; // Mantener canal abierto para respuesta asíncrona
+  }
+});
