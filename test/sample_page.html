@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página de Prueba - DocenteLens</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+      max-width: 850px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.7;
+      color: #2d3748;
+      background: #fafafa;
+    }
+    .instructions-box {
+      background: #ebf8ff;
+      border-left: 4px solid #3182ce;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .instructions-box h2 {
+      margin-top: 0;
+      color: #2b6cb0;
+      font-size: 18px;
+    }
+    .instructions-box kbd {
+      background: #fff;
+      border: 1px solid #cbd5e0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .sample-card {
+      background: #fff;
+      padding: 28px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07);
+      margin-bottom: 24px;
+      border: 1px solid #e2e8f0;
+    }
+    h1 { color: #1a202c; font-size: 26px; }
+    h2 { color: #2d3748; font-size: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px; }
+    .badge-label {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .badge-ai { background: #fed7d7; color: #9b2c2c; }
+    .badge-human { background: #c6f6d5; color: #22543d; }
+    .image-container {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+    }
+    .image-card {
+      text-align: center;
+      font-size: 13px;
+      color: #718096;
+    }
+    .image-card img {
+      border-radius: 8px;
+      width: 260px;
+      height: 260px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧪 Banco de Pruebas: DocenteLens</h1>
+  
+  <div class="instructions-box">
+    <h2>¿Cómo probar la extensión en esta página?</h2>
+    <ol>
+      <li>Asegúrate de que <strong>DocenteLens</strong> esté cargada en Chrome (desde <code>chrome://extensions</code>).</li>
+      <li>Mantén presionada la combinación configurada: por defecto <kbd>Alt</kbd> + <kbd>Clic izquierdo</kbd> (o el botón central del ratón).</li>
+      <li>Verás aparecer el indicador superior de DocenteLens y cómo se resaltan automáticamente los bloques generados por IA.</li>
+      <li>Pasa el cursor sobre los párrafos resaltados para ver el desglose métrico y las recomendaciones pedagógicas.</li>
+      <li>Al soltar el ratón o la tecla, la página vuelve instantáneamente a su estado limpio normal.</li>
+    </ol>
+  </div>
+
+  <!-- Caso 1: Texto típico generado con ChatGPT -->
+  <div class="sample-card">
+    <span class="badge-label badge-ai">Caso de Estudio 1: Ensayo generado con ChatGPT (GPT-4)</span>
+    <h2>El impacto de la inteligencia artificial en la sociedad moderna</h2>
+    <p>
+      En el mundo actual, la inteligencia artificial desempeña un papel crucial en la transformación digital de nuestra sociedad. En constante evolución, este avance tecnológico representa un sinfín de oportunidades que están redefiniendo cómo interactuamos con el conocimiento. Es fundamental destacar que no se puede subestimar la relevancia de este paradigma en la educación superior.
+    </p>
+    <p>
+      A medida que avanzamos hacia un futuro prometedor, resulta de vital importancia profundizar en los aspectos multifacéticos de la ética algorítmica. Sin lugar a dudas, nos encontramos ante un viaje transformador que forja un camino enriquecedor para las próximas generaciones, estableciendo un equilibrio delicado entre innovación y responsabilidad.
+    </p>
+    <p>
+      En conclusión, la inteligencia artificial sirve como un faro de esperanza y una piedra angular para resolver desafíos complejos. En resumidas cuentas, su adopción integral marca un antes y un después en la historia contemporánea, demostrando ser un hito significativo para la humanidad.
+    </p>
+  </div>
+
+  <!-- Caso 2: Texto genuino escrito por un estudiante humano -->
+  <div class="sample-card">
+    <span class="badge-label badge-human">Caso de Estudio 2: Redacción auténtica humana</span>
+    <h2>Reflexiones sobre mi primera semana en el laboratorio de química</h2>
+    <p>
+      Al entrar al laboratorio el lunes pasado tenía bastante miedo de equivocarme de tubo de ensayo. Mi compañero Mateo y yo tardamos casi cuarenta minutos solo en calibrar la balanza analítica porque no entendíamos bien el manual viejo que nos dieron. Honestamente, pensé que no íbamos a terminar la práctica a tiempo.
+    </p>
+    <p>
+      Sin embargo, cuando por fin logramos precipitar las sales de cobre y vimos ese color azul turquesa tan intenso, todo el esfuerzo cobró sentido. Nos dio mucha risa porque Mateo casi derrama el agua destilada sobre su cuaderno. El profesor Martínez se acercó y nos felicitó por la paciencia. Fue un día caótico pero aprendí más equivocándome tres veces seguidas que repasando la teoría durante toda la noche anterior en mi casa.
+    </p>
+  </div>
+
+  <!-- Caso 3: Imágenes -->
+  <div class="sample-card">
+    <span class="badge-label badge-ai">Caso de Estudio 3: Detección en Imágenes</span>
+    <h2>Material gráfico complementario</h2>
+    <div class="image-container">
+      <div class="image-card">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1024' height='1024' viewBox='0 0 1024 1024'><rect fill='%236366f1' width='1024' height='1024'/><text fill='white' font-size='48' font-family='sans-serif' x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle'>Imagen generada con DALL-E 3</text></svg>" 
+             alt="Imagen sintética generada por IA con prompt: escuela futurista" 
+             title="Generated with AI - Midjourney v6" 
+             width="1024" height="1024">
+        <p>Imagen sintética (Metadatos AI en Alt y dimensiones 1024x1024)</p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

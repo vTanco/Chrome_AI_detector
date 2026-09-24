@@ -1,0 +1,19 @@
+# Archivos del sistema y editores
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Paquetes y dependencias (si se añaden en el futuro)
+node_modules/
+dist/
+build/
+*.crx
+*.zip
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocenteLens - Configuración y Guía Pedagógica</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <div class="brand">
+        <span class="logo">🎓</span>
+        <div>
+          <h1>DocenteLens • Panel de Configuración</h1>
+          <p>Herramienta libre y de código abierto para la evaluación formativa de contenido sintético</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-grid">
+      <!-- Columna izquierda: Configuración -->
+      <main class="settings-col">
+        <div class="card">
+          <h2>Preferencias de Interacción</h2>
+          <div class="form-group">
+            <label for="pref-trigger">Acción del Ratón para Resaltar:</label>
+            <p class="help-text">Elige qué combinación de ratón activará el resaltador mientras lo mantengas pulsado.</p>
+            <select id="pref-trigger" class="input-control">
+              <option value="altClick">Alt / Option + Clic sostenido (Recomendado para Mac / Trackpad)</option>
+              <option value="middleClick">Rueda del ratón (Clic central sostenido)</option>
+              <option value="rightClick">Clic derecho sostenido</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="pref-sensitivity">Nivel de Sensibilidad del Algoritmo:</label>
+            <p class="help-text">Determina qué tan estricto es el detector al identificar patrones de IA.</p>
+            <select id="pref-sensitivity" class="input-control">
+              <option value="conservative">Conservador (Prioriza evitar falsos positivos a alumnos)</option>
+              <option value="balanced" selected>Equilibrado (Recomendado para trabajos académicos)</option>
+              <option value="sensitive">Sensible (Detecta indicios tempranos o leves de IA)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Tipos de Contenido:</label>
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="pref-text" checked> Analizar redacción y texto</label>
+              <label><input type="checkbox" id="pref-images" checked> Detectar imágenes generativas</label>
+            </div>
+          </div>
+
+          <button id="btn-save-prefs" class="btn btn-primary">Guardar Preferencias</button>
+          <span id="save-status" class="status-msg"></span>
+        </div>
+
+        <!-- Área de prueba en vivo para el docente -->
+        <div class="card">
+          <h2>Simulador de Texto para Docentes</h2>
+          <p class="help-text">Pega un párrafo de un trabajo o un texto de ChatGPT para ver en vivo cómo lo analiza DocenteLens:</p>
+          <textarea id="test-input" class="textarea-control" placeholder="Pega aquí el texto a analizar (mínimo 25 palabras)..."></textarea>
+          <button id="btn-run-test" class="btn btn-secondary">Analizar Texto de Prueba</button>
+
+          <div id="test-result" class="test-result-box" style="display: none;">
+            <div class="result-header">
+              <span id="res-score-badge" class="score-badge">0%</span>
+              <strong id="res-level-text">Nivel detectado</strong>
+            </div>
+            <ul id="res-indicators-list" class="res-list"></ul>
+            <div id="res-pedagogy" class="pedagogy-advice-box"></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Columna derecha: Guía Pedagógica y Ética -->
+      <aside class="guide-col">
+        <div class="card guide-card">
+          <h2>📖 Guía Pedagógica para Docentes</h2>
+          <div class="guide-item">
+            <h3>1. ¿Por qué ningún detector es 100% infalible?</h3>
+            <p>Los modelos de IA escriben imitando la estadística del lenguaje humano. Por tanto, un texto escrito por una persona con estilo muy académico, formal o estructurado puede arrojar similitud estilística sin haber usado IA.</p>
+          </div>
+
+          <div class="guide-item">
+            <h3>2. ¿Cómo interpreta DocenteLens el texto?</h3>
+            <ul>
+              <li><strong>Burstiness:</strong> Mide la variedad rítmica. Los humanos alternan frases muy cortas con subordinadas largas; las IAs tienden a longitudes homogéneas.</li>
+              <li><strong>Marcadores Léxicos:</strong> Detecta clichés recurrentes ("en conclusión", "un tapiz de", "desempeña un rol crucial").</li>
+              <li><strong>Imágenes:</strong> Rastrea metadatos de exportación, etiquetas y orígenes de servidores sintéticos.</li>
+            </ul>
+          </div>
+
+          <div class="guide-item alert-box">
+            <h3>⚖️ Recomendación Ética Fundamental</h3>
+            <p><strong>Nunca califiques ni sanciones a un estudiante basándote únicamente en un detector.</strong> Utiliza esta herramienta como una lente exploratoria para dialogar con el estudiante y pedirle que explique su razonamiento o muestre sus borradores.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="../lib/heuristics-es.js"></script>
+  <script src="../lib/heuristics-en.js"></script>
+  <script src="../lib/ai-text-detector.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

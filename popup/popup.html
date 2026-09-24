@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocenteLens</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-icon">🎓</div>
+        <div>
+          <h1 class="title">DocenteLens</h1>
+          <p class="subtitle">Herramienta libre para educadores</p>
+        </div>
+      </div>
+      <label class="switch" title="Activar o pausar la extensión">
+        <input type="checkbox" id="toggle-enabled" checked>
+        <span class="slider round"></span>
+      </label>
+    </header>
+
+    <!-- Quick Trigger Action Status -->
+    <div class="trigger-banner" id="trigger-instruction">
+      <span class="trigger-icon">🖱️</span>
+      <div class="trigger-text">
+        <strong>Acción rápida:</strong>
+        <span id="current-trigger-desc">Mantén presionado <code>Alt + Clic</code></span>
+      </div>
+    </div>
+
+    <!-- Main Controls -->
+    <section class="section">
+      <label class="section-label" for="select-trigger">Disparador del Ratón</label>
+      <select id="select-trigger" class="select-control">
+        <option value="altClick">Alt / Option + Clic sostenido (Mac / Trackpad)</option>
+        <option value="middleClick">Rueda del ratón (Botón central sostenido)</option>
+        <option value="rightClick">Clic derecho sostenido</option>
+      </select>
+    </section>
+
+    <section class="section">
+      <label class="section-label" for="select-sensitivity">Sensibilidad de Análisis</label>
+      <select id="select-sensitivity" class="select-control">
+        <option value="conservative">Conservadora (Minimiza falsos positivos)</option>
+        <option value="balanced" selected>Equilibrada (Recomendada para docentes)</option>
+        <option value="sensitive">Sensible (Detección estricta de marcadores)</option>
+      </select>
+    </section>
+
+    <!-- Content Filters -->
+    <section class="section">
+      <div class="section-label">Elementos a Inspeccionar</div>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="check-text" checked>
+          <span>Texto y redacción</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="check-images" checked>
+          <span>Imágenes sintéticas</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Manual Pin Action -->
+    <div class="actions">
+      <button id="btn-toggle-pin" class="btn btn-secondary">
+        📌 <span id="pin-btn-text">Fijar resaltado permanente</span>
+      </button>
+    </div>
+
+    <!-- Ethical / Pedagogical Footnote -->
+    <footer class="footer">
+      <p class="ethics-note">
+        💡 <strong>Uso ético docente:</strong> Los detectores de IA proporcionan indicios probabilísticos y no pruebas concluyentes. Úsalo como punto de partida para una conversación pedagógica con el estudiante.
+      </p>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
