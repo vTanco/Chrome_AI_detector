@@ -265,19 +265,31 @@
     state.highlightedElements = [];
   }
 
-  // Obtener elementos de texto relevantes para inspeccionar
+  // Obtener elementos de texto relevantes para inspeccionar de forma universal
   function getInspectableTextElements() {
-    const candidates = Array.from(
-      document.querySelectorAll("p, li, article, blockquote, div > p, section > p")
+    // Buscar párrafos, citas y contenedores de texto estándar
+    const rawElements = Array.from(
+      document.querySelectorAll(
+        "p, li, blockquote, dd, [role='paragraph'], article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment']"
+      )
     );
 
-    // Filtrar elementos visibles con texto suficiente y fuera de scripts/navs
-    return candidates.filter(el => {
-      if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true']")) {
+    // Contenedores tipo div/section que tienen texto directo sustancial sin etiquetas p hijas
+    const leafContainers = Array.from(document.querySelectorAll("div, section, td")).filter(container => {
+      if (container.querySelector("p, ul, ol, table, article, div")) return false; // Solo contenedores hoja
+      const text = (container.innerText || "").trim();
+      return text.length > 70;
+    });
+
+    const combined = [...new Set([...rawElements, ...leafContainers])];
+
+    // Filtrar elementos visibles con texto suficiente y fuera de elementos de navegación/scripts
+    return combined.filter(el => {
+      if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button")) {
         return false;
       }
       const text = el.innerText || "";
-      return text.trim().length > 80 && isElementInViewport(el);
+      return text.trim().length > 60 && isElementInViewport(el);
     });
   }
 

@@ -3,10 +3,11 @@
   "name": "DocenteLens - Detector de IA en Vivo",
   "short_name": "DocenteLens",
   "version": "1.0.0",
-  "description": "Herramienta gratuita para docentes: resalta en tiempo real texto e imágenes generadas con IA al mantener pulsado el ratón.",
+  "description": "Herramienta gratuita para docentes: ilumina en tiempo real texto e imágenes generadas con IA al pulsar Comando ⌘.",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "action": {
     "default_popup": "popup/popup.html",

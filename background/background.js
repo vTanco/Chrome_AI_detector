@@ -25,5 +25,28 @@ chrome.runtime.onInstalled.addListener(() => {
     }
   });
 
-  console.log("DocenteLens instalado y listo para su uso docente.");
+  // Inyectar en pestañas ya abiertas para que funcione de inmediato sin tener que recargarlas
+  chrome.tabs.query({ url: ["http://*/*", "https://*/*"] }, (tabs) => {
+    for (const tab of tabs) {
+      if (tab.id) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: [
+            "lib/heuristics-es.js",
+            "lib/heuristics-en.js",
+            "lib/ai-text-detector.js",
+            "lib/ai-image-detector.js",
+            "content/content.js"
+          ]
+        }).catch(() => {});
+
+        chrome.scripting.insertCSS({
+          target: { tabId: tab.id },
+          files: ["content/content.css"]
+        }).catch(() => {});
+      }
+    }
+  });
+
+  console.log("DocenteLens instalado e inyectado en pestañas activas.");
 });
