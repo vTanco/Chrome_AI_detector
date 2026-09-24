@@ -31,6 +31,22 @@ Puedes seleccionar el disparador que mejor se adapte a tu preferencia desde el i
 
 ---
 
+## 🏫 Integración Nativa con Google Classroom y Google Docs
+
+DocenteLens ha sido adaptada especialmente para el ecosistema docente de Google:
+
+1. **Google Classroom (`classroom.google.com`)**:
+   - Funciona en rúbricas, comentarios privados, respuestas directas de alumnos y paneles de calificación.
+   - Gracias a la inyección en todos los marcos (`all_frames: true`), se activa automáticamente dentro de las previsualizaciones y editores incrustados de tareas de los estudiantes.
+
+2. **Google Docs (`docs.google.com/document/...`)**:
+   - Dado que Google Docs utiliza renderizado en lienzo (`<canvas>`), DocenteLens incluye un controlador específico:
+     - **Enlace de eventos de cursor (`docs-texteventtarget`):** Captura la pulsación de la tecla `Comando ⌘` incluso cuando el cursor de edición está activo dentro del documento.
+     - **Análisis por Selección o Documento Completo:** Selecciona cualquier párrafo o pulsa `Cmd + A` para seleccionar todo el texto y mantén presionado `Comando ⌘`.
+     - **Tarjeta Flotante de Análisis:** Muestra una ventana de inspección superior con el porcentaje, la IA identificada (ChatGPT, Claude o Gemini) y las recomendaciones de evaluación.
+
+---
+
 ## 🔬 ¿Cómo funciona el Motor de Detección y Atribución de Modelos?
 
 ### 1. Detección de Texto (Múltiples factores lingüísticos)

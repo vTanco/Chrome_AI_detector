@@ -15,7 +15,8 @@
     isPinned: false,
     highlightedElements: [],
     hudElement: null,
-    tooltipElement: null
+    tooltipElement: null,
+    gdocsCardElement: null
   };
 
   // Cargar configuración guardada
@@ -84,10 +85,130 @@
       hud.style.display = "none";
       hud.innerHTML = `
         <span class="hud-pulse"></span>
-        <span>DocenteLens Activo • Iluminando contenido IA (⌘)</span>
+        <span id="docentelens-hud-text">DocenteLens Activo • Iluminando contenido IA (⌘)</span>
       `;
       document.body.appendChild(hud);
       state.hudElement = hud;
+    }
+
+    // Tarjeta Especial de Análisis para Google Docs y Classroom
+    if (!state.gdocsCardElement) {
+      const gdocsCard = document.createElement("div");
+      gdocsCard.id = "docentelens-gdocs-root";
+      gdocsCard.innerHTML = `
+        <div id="docentelens-gdocs-card" style="display: none;">
+          <div class="gdocs-header">
+            <span class="gdocs-badge-env">📄 Google Docs & Classroom • Análisis</span>
+            <span class="tt-score" id="gdocs-score-badge">0%</span>
+          </div>
+          <div class="tt-model-attribution" id="gdocs-model-box">
+            <span class="tt-model-icon" id="gdocs-model-icon">🤖</span>
+            <div class="tt-model-info">
+              <strong id="gdocs-model-name">IA Detectada</strong>
+              <small id="gdocs-watermark-desc">Trazabilidad de procedencia</small>
+            </div>
+          </div>
+          <ul class="tt-factors" id="gdocs-factors-list"></ul>
+          <div class="tt-pedagogy" id="gdocs-pedagogy-text"></div>
+        </div>
+      `;
+      document.body.appendChild(gdocsCard);
+      state.gdocsCardElement = document.getElementById("docentelens-gdocs-card");
+    }
+
+    hookGoogleDocsEvents();
+  }
+
+  const isGoogleDocs = window.location.hostname.includes("docs.google.com");
+  const isGoogleClassroom = window.location.hostname.includes("classroom.google.com");
+
+  // Capturar eventos de teclado dentro de los iframes internos de Google Docs
+  function hookGoogleDocsEvents() {
+    if (!isGoogleDocs) return;
+
+    function attach() {
+      const iframes = document.querySelectorAll(".docs-texteventtarget-iframe, iframe");
+      iframes.forEach(iframe => {
+        if (!iframe._docenteLensHooked) {
+          try {
+            if (iframe.contentWindow) {
+              iframe.contentWindow.addEventListener("keydown", handleKeyDown, true);
+              iframe.contentWindow.addEventListener("keyup", handleKeyUp, true);
+              iframe._docenteLensHooked = true;
+            }
+          } catch (e) {}
+        }
+      });
+    }
+
+    attach();
+    const observer = new MutationObserver(attach);
+    observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  }
+
+  // Obtener texto seleccionado en Google Docs
+  function getGoogleDocsSelectedText() {
+    try {
+      const iframes = document.querySelectorAll(".docs-texteventtarget-iframe, iframe");
+      for (const iframe of iframes) {
+        if (iframe.contentDocument) {
+          const sel = iframe.contentDocument.getSelection()?.toString();
+          if (sel && sel.trim().length > 20) return sel.trim();
+        }
+      }
+    } catch (e) {}
+
+    const winSel = window.getSelection()?.toString();
+    if (winSel && winSel.trim().length > 20) return winSel.trim();
+
+    return null;
+  }
+
+  function showGoogleDocsCard(result) {
+    if (!state.gdocsCardElement) return;
+    const scoreBadge = document.getElementById("gdocs-score-badge");
+    const modelBox = document.getElementById("gdocs-model-box");
+    const modelName = document.getElementById("gdocs-model-name");
+    const watermarkDesc = document.getElementById("gdocs-watermark-desc");
+    const modelIcon = document.getElementById("gdocs-model-icon");
+    const factorsList = document.getElementById("gdocs-factors-list");
+    const pedagogyText = document.getElementById("gdocs-pedagogy-text");
+
+    scoreBadge.textContent = `${result.score}% Probabilidad`;
+    scoreBadge.className = `tt-score ${result.level === "high" ? "tt-score-high" : "tt-score-medium"}`;
+
+    if (result.modelAttribution) {
+      modelBox.style.display = "flex";
+      const ma = result.modelAttribution;
+      modelName.textContent = `${ma.predictedModel} (~${ma.confidence}% de certeza)`;
+      watermarkDesc.textContent = ma.watermarkInfo || "Firma estadística de procedencia";
+      modelBox.style.borderLeftColor = ma.color;
+      modelIcon.textContent = ma.company === "OpenAI" ? "🟢" : ma.company === "Anthropic" ? "🟠" : "🔵";
+    } else {
+      modelBox.style.display = "none";
+    }
+
+    factorsList.innerHTML = "";
+    const allIndicators = [...(result.indicators || [])];
+    if (result.modelAttribution?.detectedFeatures) {
+      result.modelAttribution.detectedFeatures.forEach(feat => {
+        if (!allIndicators.includes(feat)) allIndicators.unshift(feat);
+      });
+    }
+
+    allIndicators.forEach(ind => {
+      const li = document.createElement("li");
+      li.textContent = ind;
+      factorsList.appendChild(li);
+    });
+
+    pedagogyText.textContent = result.pedagogicalAdvice || "";
+    state.gdocsCardElement.style.display = "block";
+  }
+
+  function hideGoogleDocsCard() {
+    if (state.gdocsCardElement) {
+      state.gdocsCardElement.style.display = "none";
     }
   }
 
@@ -117,36 +238,30 @@
     }
   }
 
-  // Evento Keydown: Iluminar contenido generado por IA al pulsar la tecla Comando ⌘
-  window.addEventListener(
-    "keydown",
-    e => {
-      if (!state.isEnabled) return;
-      if (state.triggerMode === "commandKey" && isCommandKey(e)) {
-        if (e.repeat) return; // Evitar disparos repetidos mientras se mantiene presionada
-        state.isHolding = true;
-        showHUD();
-        scanAndHighlight();
-      }
-    },
-    true
-  );
+  function handleKeyDown(e) {
+    if (!state.isEnabled) return;
+    if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+      if (e.repeat) return;
+      state.isHolding = true;
+      showHUD();
+      scanAndHighlight();
+    }
+  }
 
-  // Evento Keyup: Al soltar la tecla Comando ⌘, restaurar la página
-  window.addEventListener(
-    "keyup",
-    e => {
-      if (state.triggerMode === "commandKey" && isCommandKey(e)) {
-        if (state.isHolding && !state.isPinned) {
-          state.isHolding = false;
-          hideHUD();
-          clearHighlights();
-          hideTooltip();
-        }
+  function handleKeyUp(e) {
+    if (state.triggerMode === "commandKey" && isCommandKey(e)) {
+      if (state.isHolding && !state.isPinned) {
+        state.isHolding = false;
+        hideHUD();
+        clearHighlights();
+        hideTooltip();
+        hideGoogleDocsCard();
       }
-    },
-    true
-  );
+    }
+  }
+
+  window.addEventListener("keydown", handleKeyDown, true);
+  window.addEventListener("keyup", handleKeyUp, true);
 
   // Evento Mousedown: Si está configurado en modo ratón
   window.addEventListener(
@@ -202,6 +317,23 @@
   // Escanear el DOM y aplicar resaltados
   function scanAndHighlight() {
     clearHighlights();
+    hideGoogleDocsCard();
+
+    // Soporte especial en Google Docs (Editor y Vistas de Tareas)
+    if (isGoogleDocs) {
+      const selectedText = getGoogleDocsSelectedText();
+      if (selectedText) {
+        const result = AITextDetector.analyze(selectedText, state.sensitivity);
+        if (result.eligible) {
+          showGoogleDocsCard(result);
+        }
+      } else {
+        const hudText = document.getElementById("docentelens-hud-text");
+        if (hudText) {
+          hudText.textContent = "Google Docs: Selecciona texto (o Cmd+A) y mantén presionado ⌘";
+        }
+      }
+    }
 
     // 1. Análisis de Texto
     if (state.detectText && typeof AITextDetector !== "undefined") {
@@ -265,6 +397,12 @@
 
   // Eliminar todos los resaltados y badges sin alterar el DOM original
   function clearHighlights() {
+    hideGoogleDocsCard();
+    const hudText = document.getElementById("docentelens-hud-text");
+    if (hudText) {
+      hudText.textContent = "DocenteLens Activo • Iluminando contenido IA (⌘)";
+    }
+
     state.highlightedElements.forEach(({ element, badge }) => {
       element.classList.remove(
         "docentelens-highlight-high",
@@ -281,31 +419,31 @@
     state.highlightedElements = [];
   }
 
-  // Obtener elementos de texto relevantes para inspeccionar de forma universal
+  // Obtener elementos de texto relevantes para inspeccionar de forma universal (incluyendo Classroom y Google Docs)
   function getInspectableTextElements() {
-    // Buscar párrafos, citas y contenedores de texto estándar
+    // Buscar párrafos, citas y contenedores de texto estándar y educativos (Classroom / Docs)
     const rawElements = Array.from(
       document.querySelectorAll(
-        "p, li, blockquote, dd, [role='paragraph'], article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment']"
+        "p, li, blockquote, dd, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment'], div[data-message-author], .MuiTypography-root, .kix-lineview, .kix-paragraphrenderer, .kix-wordhtmlgenerator-wordnode, [aria-label]"
       )
     );
 
     // Contenedores tipo div/section que tienen texto directo sustancial sin etiquetas p hijas
-    const leafContainers = Array.from(document.querySelectorAll("div, section, td")).filter(container => {
+    const leafContainers = Array.from(document.querySelectorAll("div, section, td, [role='listitem']")).filter(container => {
       if (container.querySelector("p, ul, ol, table, article, div")) return false; // Solo contenedores hoja
       const text = (container.innerText || "").trim();
-      return text.length > 70;
+      return text.length > 60;
     });
 
     const combined = [...new Set([...rawElements, ...leafContainers])];
 
     // Filtrar elementos visibles con texto suficiente y fuera de elementos de navegación/scripts
     return combined.filter(el => {
-      if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button")) {
+      if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button, .docs-title-widget, .docs-menubar")) {
         return false;
       }
       const text = el.innerText || "";
-      return text.trim().length > 60 && isElementInViewport(el);
+      return text.trim().length > 50 && isElementInViewport(el);
     });
   }
 
