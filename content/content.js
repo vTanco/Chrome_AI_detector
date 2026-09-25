@@ -828,7 +828,7 @@
               highlightClass += " docentelens-highlight-high-google";
             }
           }
-          el.className += " " + highlightClass;
+          highlightClass.split(" ").filter(Boolean).forEach(c => el.classList.add(c));
 
           const badge = document.createElement("span");
           badge.className = `docentelens-badge ${result.level === "high" ? "docentelens-badge-high" : "docentelens-badge-medium"}`;
@@ -846,8 +846,14 @@
       const hudText = document.getElementById("docentelens-hud-text");
       if (hudText && !isGoogleDocs) {
         const count = state.highlightedElements.length;
-        if (count > 0) {
-          hudText.textContent = `${count} ${count === 1 ? "elemento IA" : "elementos IA"}`;
+        if (count === 1 && state.highlightedElements[0]?.element?._docenteLensData) {
+          const firstData = state.highlightedElements[0].element._docenteLensData;
+          const mName = firstData.modelAttribution?.predictedModel?.split(" ")[0] || "IA";
+          hudText.textContent = `${mName} (~${firstData.score}%)`;
+        } else if (count > 1) {
+          hudText.textContent = `${count} elementos IA`;
+        } else {
+          hudText.textContent = "Redacción orgánica";
         }
       }
     }
@@ -961,43 +967,68 @@
 
   // Obtener elementos de texto relevantes para inspeccionar
   function getInspectableTextElements() {
-    const inspectable = [];
-
-    // 1. Google Classroom: Rúbricas y Tarjetas de Criterios
+    // 1. Google Classroom: Rúbricas y Tarjetas de Criterios especializadas
     const rubricCards = findClassroomRubricsAndCards();
-    rubricCards.forEach(card => inspectable.push(card));
 
-    // 2. Elementos de texto estándar
+    // 2. Selectores específicos de Google Classroom (instrucciones, consignas, tareas, publicaciones)
+    const classroomElements = Array.from(
+      document.querySelectorAll(
+        '[dir="auto"], .QRiHXd, .tLDEHd, .k330Eb, .asQXV, .Y5v0kf, .b95Du, [data-topic-id] [dir="auto"], div[data-item-id] [dir="auto"], div[data-stream-item-id] [dir="auto"], div[data-item-id] div, div[data-stream-item-id] div, .VfPpkd-WsjYwc'
+      )
+    );
+
+    // 3. Elementos de texto estándar
     const standardElements = Array.from(
       document.querySelectorAll(
-        "p, blockquote, dd, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph'], div[class*='text'], div[class*='comment'], div[data-message-author], .MuiTypography-root, [aria-label]"
+        "p, blockquote, dd, dt, li, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph' i], div[class*='text' i], div[class*='comment' i], div[data-message-author], .MuiTypography-root"
       )
     );
-    standardElements.forEach(el => inspectable.push(el));
 
-    // 3. Contenedores de contenido educativo y bloques semánticos (instrucciones, tareas, celdas de nivel)
+    // 4. Contenedores de contenido educativo y bloques semánticos (instrucciones, tareas, celdas de nivel)
     const contentBlocks = Array.from(
       document.querySelectorAll(
-        "div[role='region'], div[role='article'], div[class*='instruction' i], div[class*='description' i], div[class*='assignment' i], div[class*='submission' i], div[class*='criterion' i], div[class*='rubric' i], div[class*='cell' i], div[class*='level' i], div[class*='card' i]"
+        "div[role='region'], div[role='article'], div[class*='instruction' i], div[class*='description' i], div[class*='assignment' i], div[class*='submission' i], div[class*='criterion' i], div[class*='rubric' i], div[class*='cell' i], div[class*='level' i], div[class*='card' i], div[class*='content' i], div[class*='body' i]"
       )
     );
-    contentBlocks.forEach(el => inspectable.push(el));
 
-    // 4. Desduplicar y filtrar elementos visibles con texto suficiente
-    const unique = [...new Set(inspectable)];
+    // 5. Todos los candidatos a texto
+    const allCandidates = [...new Set([...classroomElements, ...standardElements, ...contentBlocks])];
 
-    return unique.filter(el => {
-      if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button, .docs-title-widget, .docs-menubar")) {
+    // Filtrar candidatos válidos en el viewport con texto sustancial (mínimo 8 palabras) y fuera de elementos de UI
+    const validCandidates = allCandidates.filter(el => {
+      if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button, input, textarea, select, option, .docs-title-widget, .docs-menubar, #docentelens-hud, #docentelens-tooltip, #docentelens-gdocs-root, #docentelens-gdocs-quick-button")) {
         return false;
       }
       const text = (el.innerText || "").trim();
       const words = text.match(/[\p{L}\p{N}]+/gu) || [];
-      return words.length >= 10 && isElementInViewport(el);
+      return words.length >= 8 && isElementInViewport(el);
     });
+
+    // 6. Algoritmo de Bloques Hoja (Leaf Text Blocks):
+    // Si un contenedor ancestro contiene a otro elemento hijo que también es un bloque de texto válido,
+    // se descarta el ancestro para iluminar únicamente el párrafo o bloque hoja específico.
+    const leafTextBlocks = validCandidates.filter(cand => {
+      return !validCandidates.some(other => other !== cand && cand.contains(other));
+    });
+
+    // Combinar rúbricas especializadas y bloques hoja evitando duplicación
+    const finalInspectable = [];
+    rubricCards.forEach(card => finalInspectable.push(card));
+
+    leafTextBlocks.forEach(block => {
+      const isInsideRubric = rubricCards.some(rc => rc !== block && rc.contains(block));
+      if (!isInsideRubric) {
+        finalInspectable.push(block);
+      }
+    });
+
+    return [...new Set(finalInspectable)];
   }
 
   function isElementInViewport(el) {
+    if (!el || typeof el.getBoundingClientRect !== "function") return false;
     const rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return false;
     return (
       rect.bottom >= 0 &&
       rect.right >= 0 &&
