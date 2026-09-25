@@ -272,12 +272,88 @@
     </div>
   </div>
 
+  <!-- Caso 8: Visor de PDF adjunto en Google Drive / Classroom -->
+  <div class="sample-card drive-viewer-container" style="border: 2px dashed #93c5fd; background: #f8fafc;">
+    <span class="badge-label badge-ai">Caso 8: Visor de PDF adjunto simulado (Google Drive / Classroom)</span>
+    <h2>Previsualización de Documento Adjunto: ensayo_bioetica.pdf</h2>
+    <div class="drive-viewer-tool-strip" style="background: #1e293b; color: #fff; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; display: flex; justify-content: space-between;">
+      <span>Página 1 de 3</span>
+      <span>100%</span>
+    </div>
+    <div class="textLayer" data-page-number="1" style="background: #ffffff; padding: 20px; border: 1px solid #cbd5e1; border-radius: 6px; line-height: 1.8;">
+      <span>En conclusión, es fundamental destacar que la edición genética mediante CRISPR-Cas9</span>
+      <span>representa un paradigma transformador en la medicina contemporánea.</span>
+      <span>En constante evolución, este avance sirve como un faro de esperanza para erradicar patologías hereditarias complejas.</span>
+      <span>No obstante, resulta interesante notar cómo la sinergia bioética debe guiar cada hito significativo.</span>
+    </div>
+  </div>
+
+  <!-- Caso 9: Hilo de Comentarios de Alumnos en Google Classroom -->
+  <div class="sample-card">
+    <span class="badge-label badge-ai">Caso 9: Hilo de Comentarios y Foros en Google Classroom</span>
+    <h2>Comentarios de la clase sobre la Tarea 01</h2>
+    
+    <!-- Comentario de Alumno 1 (IA - Claude) -->
+    <div data-comment-id="comm-101" class="docentelens-comment-box" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fff;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-weight: 700; color: #1e293b;" data-author="Carlos Mendoza">Carlos Mendoza</span>
+        <span style="font-size: 11px; color: #94a3b8;">Ayer a las 18:32</span>
+      </div>
+      <p style="margin: 0; font-size: 13.5px; color: #334155;">
+        Ciertamente, vale la pena considerar el impacto de estos componentes desde una perspectiva técnica matizada. Un matiz importante que debemos sopesar con atención es la relación coste-efectividad de la memoria DDR5 frente a DDR4 en presupuestos de gama de entrada. Es preciso distinguir entre el rendimiento pico teórico y la experiencia de uso real en tareas ofimáticas cotidianas.
+      </p>
+    </div>
+
+    <!-- Comentario de Alumno 2 (Humano) -->
+    <div data-comment-id="comm-102" class="docentelens-comment-box" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #fff;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-weight: 700; color: #1e293b;" data-author="Lucía Gómez">Lucía Gómez</span>
+        <span style="font-size: 11px; color: #94a3b8;">Hoy a las 09:15</span>
+      </div>
+      <p style="margin: 0; font-size: 13.5px; color: #334155;">
+        Profe, no me queda del todo claro si para el perfil de diseño gráfico podemos meter una tarjeta gráfica de segunda mano o si tiene que ser todo de tiendas oficiales con garantía nueva. Gracias!
+      </p>
+    </div>
+  </div>
+
+  <!-- Caso 10: Tabla de Entregas de la Clase (Vista de Calificaciones de Classroom) -->
+  <div class="sample-card">
+    <span class="badge-label badge-ai">Caso 10: Roster de Entregas en Classroom (/submissions)</span>
+    <h2>Entregas de los alumnos: Proyecto 01</h2>
+    <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+      <div role="row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
+        <div>
+          <strong data-name="Alejandro Sanz">Alejandro Sanz</strong>
+          <div style="font-size: 12px; color: #64748b;">En resumen, este setup proporciona un sinfín de oportunidades para optimizar el rendimiento térmico y alcanzar un hito significativo.</div>
+        </div>
+        <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Entregado</span>
+      </div>
+
+      <div role="row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; background: #ffffff;">
+        <div>
+          <strong data-name="Elena Morales">Elena Morales</strong>
+          <div style="font-size: 12px; color: #64748b;">Elegí el procesador Ryzen 5 porque era el más barato que venía con ventilador incluido y me alcanzaba la plata.</div>
+        </div>
+        <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Entregado</span>
+      </div>
+
+      <div role="row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc;">
+        <div>
+          <strong data-name="David Torres">David Torres</strong>
+          <div style="font-size: 12px; color: #64748b;">A continuación te presento los puntos clave a tener en cuenta para maximizar el flujo de trabajo computacional.</div>
+        </div>
+        <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Entregado</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts analíticos de DocenteLens (garantiza funcionamiento tanto standalone como vía extensión) -->
   <script src="../lib/heuristics-es.js"></script>
   <script src="../lib/heuristics-en.js"></script>
   <script src="../lib/ai-model-profiler.js"></script>
   <script src="../lib/ai-text-detector.js"></script>
   <script src="../lib/ai-image-detector.js"></script>
+  <script src="../lib/report-generator.js"></script>
   <script src="../content/content.js"></script>
 </body>
 </html>

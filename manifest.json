@@ -42,6 +42,7 @@
         "lib/ai-model-profiler.js",
         "lib/ai-text-detector.js",
         "lib/ai-image-detector.js",
+        "lib/report-generator.js",
         "content/content.js"
       ],
       "css": ["content/content.css"],
