@@ -1432,55 +1432,57 @@
     state.highlightedElements = [];
   }
 
-  // Búsqueda inteligente de componentes educativos (rúbricas de Classroom, tarjetas de criterios, cajas de nivel)
+  // Búsqueda inteligente de componentes educativos (cajas de nivel individuales y tarjetas de rúbrica en Classroom)
   function findClassroomRubricsAndCards() {
-    const cards = [];
+    const levelBoxes = [];
 
-    // 1. Selectores directos de componentes de rúbrica en Google Classroom y plataformas LMS
-    const specificSelectors = [
-      '[data-criterion-id]',
-      '[data-rubric-id]',
-      '[class*="rubric" i]',
-      '[class*="criterion" i]',
-      '[aria-label*="rúbrica" i]',
-      '[aria-label*="rubric" i]',
-      'div[jscontroller][data-id]'
+    // 1. Selectores directos de cajas de nivel individuales en Google Classroom y plataformas LMS
+    const levelSelectors = [
+      '.rubric-box',
+      '[data-level-id]',
+      '[class*="rubric-box" i]',
+      '[class*="level-box" i]',
+      '[class*="rubric-level" i]',
+      '[class*="criterion-level" i]',
+      '[class*="level-cell" i]',
+      '[aria-label*="nivel" i]'
     ];
 
     try {
-      const elements = document.querySelectorAll(specificSelectors.join(","));
+      const elements = document.querySelectorAll(levelSelectors.join(","));
       elements.forEach(el => {
-        const text = (el.innerText || "").trim();
-        if (text.length >= 25) {
-          cards.push(el);
+        const text = (el.innerText || el.textContent || "").trim();
+        if (text.length >= 8) {
+          levelBoxes.push(el);
         }
       });
     } catch (e) {}
 
-    // 2. Búsqueda estructural por contenido de tarjetas de criterios y niveles (como en Classroom)
-    const potentialContainers = document.querySelectorAll('div, section, article, [role="region"], [role="listitem"]');
+    // 2. Búsqueda estructural por contenido de cajas de nivel individuales (cajas hoja con puntos y nivel)
+    const potentialContainers = document.querySelectorAll('div, [role="button"], [role="cell"], td, [role="listitem"]');
     potentialContainers.forEach(container => {
-      if (container === document.body || container.children.length > 25) return;
+      if (container === document.body || levelBoxes.includes(container)) return;
       const text = (container.innerText || "").trim();
-      if (text.length < 25 || text.length > 2500) return;
+      if (text.length < 8 || text.length > 600) return;
 
-      const hasPoints = /\b\d+\s*puntos?\b|\/\s*\d+/i.test(text);
-      const hasLevels = /\b(notable|sobresaliente|suficiente|insuficiente|sin hacer|excelente|muy bien|bien|regular|deficiente)\b/i.test(text);
+      const hasPoints = /\b\d+\s*(?:puntos?|pts?)\b|\/\s*\d+/i.test(text);
+      const hasLevels = /\b(notable|sobresaliente|suficiente|insuficiente|sin hacer|excelente|muy bien|bien|regular|deficiente|bajo|medio|alto)\b/i.test(text);
 
       if (hasPoints && hasLevels) {
-        // Evitar seleccionar un contenedor padre si un hijo ya es una tarjeta completa de criterio
-        const hasChildCard = Array.from(container.children).some(child => {
+        // Asegurar que sea la caja más interna (ningún hijo directo tiene tanto puntos como nivel)
+        const hasChildLevel = Array.from(container.children).some(child => {
           const ct = (child.innerText || "").trim();
-          return /\b\d+\s*puntos?\b|\/\s*\d+/i.test(ct) && /\b(notable|sobresaliente|suficiente|insuficiente|sin hacer)\b/i.test(ct);
+          return /\b\d+\s*(?:puntos?|pts?)\b|\/\s*\d+/i.test(ct) &&
+                 /\b(notable|sobresaliente|suficiente|insuficiente|sin hacer|excelente|bien|regular|deficiente)\b/i.test(ct);
         });
 
-        if (!hasChildCard) {
-          cards.push(container);
+        if (!hasChildLevel) {
+          levelBoxes.push(container);
         }
       }
     });
 
-    return cards;
+    return levelBoxes;
   }
 
   // Búsqueda inteligente de comentarios e hilos de debate en Classroom y foros educativos
@@ -1519,17 +1521,41 @@
   function getInspectableTextElements() {
     const inspectable = [];
 
-    // 1. Google Classroom y plataformas LMS: Rúbricas y Tarjetas de Criterios especializadas
-    const rubricCards = findClassroomRubricsAndCards();
-    rubricCards.forEach(card => inspectable.push(card));
+    // 1. Google Classroom y plataformas LMS: Cajas de nivel de rúbricas individuales
+    const rubricBoxes = findClassroomRubricsAndCards();
+    rubricBoxes.forEach(box => inspectable.push(box));
 
     // 2. Google Classroom y Foros: Hilos de debate y comentarios de estudiantes
     const comments = findClassroomCommentElements();
     comments.forEach(comment => inspectable.push(comment));
 
-    // 3. Recorrido Universal Exhaustivo del DOM (incluyendo Web Components y Shadow DOM)
-    // Extrae CADA bloque de texto, párrafo o consigna del HTML sin depender de clases CSS ofuscadas o cambiantes.
-    const BLOCK_TAGS = new Set(["P", "DIV", "LI", "BLOCKQUOTE", "DD", "DT", "SECTION", "ARTICLE", "MAIN"]);
+    // 3. Google Drive / Classroom Visor PDF: Capas de texto de documento adjunto (.textLayer)
+    try {
+      const pdfLayers = document.querySelectorAll('.textLayer, [data-page-number]');
+      pdfLayers.forEach(layer => {
+        const text = (layer.innerText || layer.textContent || "").trim();
+        if (text.length >= 25 && !inspectable.includes(layer)) {
+          inspectable.push(layer);
+        }
+      });
+    } catch (e) {}
+
+    // Conjuntos de referencia para evitar solapamientos y duplicaciones
+    const specialElements = new Set(inspectable);
+
+    // 4. Recorrido Universal Exhaustivo del DOM (incluyendo Web Components y Shadow DOM)
+    // Extrae CADA bloque de texto, párrafo, título, celda o consigna del HTML
+    const ATOMIC_BLOCK_TAGS = new Set([
+      "P", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "TD", "TH",
+      "BLOCKQUOTE", "CAPTION", "FIGCAPTION", "SUMMARY", "DT", "DD"
+    ]);
+
+    const CONTAINER_TAGS = new Set([
+      "DIV", "SECTION", "ARTICLE", "MAIN", "ASIDE", "HEADER", "FOOTER",
+      "FORM", "FIELDSET", "TABLE", "TBODY", "THEAD", "TFOOT", "TR",
+      "UL", "OL", "DL", "NAV", "FIGURE", "BODY"
+    ]);
+
     const IGNORE_TAGS = new Set([
       "SCRIPT", "STYLE", "NOSCRIPT", "SVG", "INPUT", "TEXTAREA",
       "SELECT", "OPTION", "HEAD", "META", "LINK", "AUDIO", "VIDEO"
@@ -1546,45 +1572,77 @@
       const tag = (node.tagName || "").toUpperCase();
       if (IGNORE_TAGS.has(tag)) return;
       if (node.id && typeof node.id === "string" && node.id.startsWith("docentelens-")) return;
+      if (node.classList && (node.classList.contains("docentelens-badge") || node.classList.contains("docentelens-hud"))) return;
 
       // Explorar Shadow Root abierto si el componente web lo utiliza
       if (node.shadowRoot) {
         traverseTree(node.shadowRoot);
       }
 
-      // Si este nodo ya está contenido dentro de una tarjeta de rúbrica o comentario ya seleccionado, no duplicar
-      if (rubricCards.some(rc => rc !== node && rc.contains(node)) || comments.some(c => c !== node && c.contains(node))) {
+      // Si este nodo es una caja de rúbrica, comentario o visor de PDF ya seleccionada, no descender a sus hijos
+      if (specialElements.has(node)) {
         return;
       }
 
-      const isBlock = BLOCK_TAGS.has(tag) || (node.getAttribute && (node.getAttribute("dir") === "auto" || node.getAttribute("role") === "paragraph"));
+      // Si este nodo está dentro de un elemento especial ya registrado, no inspeccionar por separado
+      for (const sp of specialElements) {
+        if (sp !== node && sp.contains(node)) {
+          return;
+        }
+      }
+
       const text = (node.innerText || node.textContent || "").trim();
       const words = countWords(text);
 
-      if (isBlock && words >= 8) {
-        // Comprobar si tiene hijos directos o descendientes en bloque que contengan suficiente texto (>= 8 palabras)
-        let hasChildBlockWithSubstantialText = false;
+      // Si es una etiqueta de bloque atómica (párrafos, títulos H1-H6, listas, celdas de tabla)
+      if (ATOMIC_BLOCK_TAGS.has(tag)) {
+        if (words >= 3) {
+          inspectable.push(node);
+        }
+        return; // No descender a etiquetas en línea (span, strong, em, a)
+      }
+
+      // Si es un contenedor de bloques (DIV, SECTION, etc. o atributos de bloque como dir="auto")
+      const isContainer = CONTAINER_TAGS.has(tag) || (node.getAttribute && (node.getAttribute("dir") === "auto" || node.getAttribute("role") === "paragraph" || node.getAttribute("role") === "region" || node.getAttribute("role") === "row"));
+
+      if (isContainer) {
+        // Comprobar si tiene algún hijo directo que sea un bloque o contenedor con texto sustancial
         const children = node.children || [];
+        let hasBlockChildren = false;
+
         for (let i = 0; i < children.length; i++) {
           const c = children[i];
           const cTag = (c.tagName || "").toUpperCase();
-          if (BLOCK_TAGS.has(cTag)) {
+          if (
+            ATOMIC_BLOCK_TAGS.has(cTag) ||
+            specialElements.has(c) ||
+            CONTAINER_TAGS.has(cTag) ||
+            (c.getAttribute && (c.getAttribute("dir") === "auto" || c.getAttribute("role") === "paragraph"))
+          ) {
             const cWords = countWords(c.innerText || c.textContent);
-            if (cWords >= 8) {
-              hasChildBlockWithSubstantialText = true;
+            if (cWords >= 3) {
+              hasBlockChildren = true;
               break;
             }
           }
         }
 
-        // Si ningún hijo en bloque tiene texto sustancial, este nodo es un bloque hoja (párrafo o consigna completa)
-        if (!hasChildBlockWithSubstantialText) {
+        // Si tiene hijos en bloque, recorrer a cada hijo para alcanzar los bloques individuales
+        if (hasBlockChildren) {
+          for (let i = 0; i < children.length; i++) {
+            traverseTree(children[i]);
+          }
+          return;
+        }
+
+        // Si no tiene hijos en bloque pero contiene texto sustancial (>= 3 palabras), es un bloque hoja
+        if (words >= 3) {
           inspectable.push(node);
           return;
         }
       }
 
-      // Si es un contenedor padre con hijos en bloque, recorrer a sus hijos para alcanzar los bloques hoja
+      // Para otros elementos, continuar el recorrido hacia los hijos
       const children = node.children || [];
       for (let i = 0; i < children.length; i++) {
         traverseTree(children[i]);
