@@ -147,14 +147,14 @@
       state.tooltipElement = document.getElementById("docentelens-tooltip");
     }
 
-    // 2. HUD Flotante Activo Superior
+    // 2. HUD Flotante Activo (Discreto inferior izquierdo)
     if (!state.hudElement) {
       const hud = document.createElement("div");
       hud.id = "docentelens-hud";
       hud.style.display = "none";
       hud.innerHTML = `
         <span class="hud-pulse"></span>
-        <span id="docentelens-hud-text">DocenteLens Activo • Iluminando contenido IA (⌘)</span>
+        <span id="docentelens-hud-text">DocenteLens (⌘)</span>
       `;
       document.body.appendChild(hud);
       state.hudElement = hud;
@@ -253,7 +253,7 @@
         showHUD();
         const hudText = document.getElementById("docentelens-hud-text");
         if (hudText) {
-          hudText.textContent = "DocenteLens Activo • Analizando Documento...";
+          hudText.textContent = "Analizando...";
         }
         await scanAndHighlight();
       });
@@ -746,7 +746,7 @@
     if (isGoogleDocs) {
       const hudText = document.getElementById("docentelens-hud-text");
       if (hudText) {
-        hudText.textContent = "DocenteLens Activo • Analizando Documento de Google...";
+        hudText.textContent = "Analizando...";
       }
 
       const docContent = await getGoogleDocsContent();
@@ -759,7 +759,7 @@
 
           if (hudText) {
             const mName = result.modelAttribution ? result.modelAttribution.predictedModel : "IA";
-            hudText.textContent = `DocenteLens Activo • ${mName} detectado (~${result.score}%) en Google Docs`;
+            hudText.textContent = `${mName} (~${result.score}%)`;
           }
           return;
         } else {
@@ -775,7 +775,7 @@
             pedagogicalAdvice: "El texto analizado no presenta firmas de IA (Claude, Gemini ni ChatGPT). Redacción consistente con autoría orgánica."
           });
           if (hudText) {
-            hudText.textContent = "DocenteLens Activo • Google Docs: Redacción orgánica o humana detectada";
+            hudText.textContent = "Redacción orgánica";
           }
           return;
         }
@@ -797,7 +797,7 @@
         if (manualBox) manualBox.style.display = "block";
 
         if (hudText) {
-          hudText.textContent = "DocenteLens • Google Docs: Selecciona texto o pégalo en la tarjeta";
+          hudText.textContent = "Selecciona o pega texto";
         }
         return;
       }
@@ -847,7 +847,7 @@
       if (hudText && !isGoogleDocs) {
         const count = state.highlightedElements.length;
         if (count > 0) {
-          hudText.textContent = `DocenteLens Activo • ${count} ${count === 1 ? "elemento IA iluminado" : "elementos IA iluminados"} (⌘)`;
+          hudText.textContent = `${count} ${count === 1 ? "elemento IA" : "elementos IA"}`;
         }
       }
     }
@@ -882,7 +882,7 @@
     hideGoogleDocsCard();
     const hudText = document.getElementById("docentelens-hud-text");
     if (hudText) {
-      hudText.textContent = "DocenteLens Activo • Iluminando contenido IA (⌘)";
+      hudText.textContent = "DocenteLens (⌘)";
     }
 
     state.highlightedElements.forEach(({ element, badge }) => {
