@@ -240,7 +240,7 @@
     if ((isGoogleDocs || isGoogleClassroom) && !document.getElementById("docentelens-gdocs-quick-button")) {
       const quickBtn = document.createElement("div");
       quickBtn.id = "docentelens-gdocs-quick-button";
-      quickBtn.title = "DocenteLens • Analizar Documento de Google";
+      quickBtn.title = "DocenteLens • Analizar Documento / Tarea";
       quickBtn.innerHTML = `
         <span class="gdocs-btn-icon">🔍</span>
         <span class="gdocs-btn-text">DocenteLens IA</span>
@@ -249,6 +249,14 @@
 
       quickBtn.addEventListener("click", async e => {
         e.stopPropagation();
+        if (state.isPinned && state.highlightedElements.length > 0) {
+          state.isPinned = false;
+          clearHighlights();
+          hideHUD();
+          hideTooltip();
+          hideGoogleDocsCard();
+          return;
+        }
         state.isPinned = true;
         showHUD();
         const hudText = document.getElementById("docentelens-hud-text");
@@ -631,7 +639,9 @@
     }
   }
 
-  // Inicio de activación (mantener pulsado)
+  let keyPressStartTime = 0;
+
+  // Inicio de activación (mantener pulsado o pulsar para conmutar)
   function handleHoldStart() {
     if (!state.isEnabled) return;
     state.isHolding = true;
@@ -641,6 +651,22 @@
 
   // Fin de activación (soltar tecla)
   function handleHoldEnd() {
+    const elapsed = Date.now() - keyPressStartTime;
+
+    // Si fue una pulsación corta (tap rápido < 260ms), actuar como conmutador (toggle) de fijado
+    if (elapsed > 0 && elapsed < 260) {
+      state.isPinned = !state.isPinned;
+      if (!state.isPinned) {
+        state.isHolding = false;
+        hideHUD();
+        clearHighlights();
+        hideTooltip();
+        hideGoogleDocsCard();
+      }
+      return;
+    }
+
+    // Si se mantuvo presionada más tiempo, limpiar al soltar (salvo si estaba fijado previamente)
     if (state.triggerMode === "commandKey" && state.isHolding && !state.isPinned) {
       state.isHolding = false;
       hideHUD();
@@ -654,6 +680,7 @@
   function onKeydownHandler(e) {
     if (state.triggerMode === "commandKey" && isCommandKey(e)) {
       if (e.repeat) return;
+      keyPressStartTime = Date.now();
       handleHoldStart();
     }
   }
@@ -813,6 +840,7 @@
 
         if (result.eligible && result.level !== "none") {
           let highlightClass = result.level === "high" ? "docentelens-highlight-high" : "docentelens-highlight-medium";
+          let badgeClass = result.level === "high" ? "docentelens-badge-high" : "docentelens-badge-medium";
 
           let modelTag = "IA";
           if (result.modelAttribution) {
@@ -820,18 +848,21 @@
             if (comp === "OpenAI") {
               modelTag = "ChatGPT";
               highlightClass += " docentelens-highlight-high-openai";
+              badgeClass = "docentelens-badge-openai";
             } else if (comp === "Anthropic") {
               modelTag = "Claude";
               highlightClass += " docentelens-highlight-high-anthropic";
+              badgeClass = "docentelens-badge-anthropic";
             } else if (comp.includes("Google")) {
               modelTag = "Gemini";
               highlightClass += " docentelens-highlight-high-google";
+              badgeClass = "docentelens-badge-google";
             }
           }
           highlightClass.split(" ").filter(Boolean).forEach(c => el.classList.add(c));
 
           const badge = document.createElement("span");
-          badge.className = `docentelens-badge ${result.level === "high" ? "docentelens-badge-high" : "docentelens-badge-medium"}`;
+          badge.className = `docentelens-badge ${badgeClass}`;
           badge.textContent = `${modelTag} ~${result.score}%`;
           el.appendChild(badge);
 
@@ -933,7 +964,7 @@
       const elements = document.querySelectorAll(specificSelectors.join(","));
       elements.forEach(el => {
         const text = (el.innerText || "").trim();
-        if (text.length >= 25 && isElementInViewport(el)) {
+        if (text.length >= 25) {
           cards.push(el);
         }
       });
@@ -949,7 +980,7 @@
       const hasPoints = /\b\d+\s*puntos?\b|\/\s*\d+/i.test(text);
       const hasLevels = /\b(notable|sobresaliente|suficiente|insuficiente|sin hacer|excelente|muy bien|bien|regular|deficiente)\b/i.test(text);
 
-      if (hasPoints && hasLevels && isElementInViewport(container)) {
+      if (hasPoints && hasLevels) {
         // Evitar seleccionar un contenedor padre si un hijo ya es una tarjeta completa de criterio
         const hasChildCard = Array.from(container.children).some(child => {
           const ct = (child.innerText || "").trim();
@@ -965,64 +996,83 @@
     return cards;
   }
 
-  // Obtener elementos de texto relevantes para inspeccionar
+  // Obtener elementos de texto relevantes para inspeccionar (Árbol DOM Universal + Shadow DOM + Rúbricas)
   function getInspectableTextElements() {
-    // 1. Google Classroom: Rúbricas y Tarjetas de Criterios especializadas
+    const inspectable = [];
+
+    // 1. Google Classroom y plataformas LMS: Rúbricas y Tarjetas de Criterios especializadas
     const rubricCards = findClassroomRubricsAndCards();
+    rubricCards.forEach(card => inspectable.push(card));
 
-    // 2. Selectores específicos de Google Classroom (instrucciones, consignas, tareas, publicaciones)
-    const classroomElements = Array.from(
-      document.querySelectorAll(
-        '[dir="auto"], .QRiHXd, .tLDEHd, .k330Eb, .asQXV, .Y5v0kf, .b95Du, [data-topic-id] [dir="auto"], div[data-item-id] [dir="auto"], div[data-stream-item-id] [dir="auto"], div[data-item-id] div, div[data-stream-item-id] div, .VfPpkd-WsjYwc'
-      )
-    );
+    // 2. Recorrido Universal Exhaustivo del DOM (incluyendo Web Components y Shadow DOM)
+    // Extrae CADA bloque de texto, párrafo o consigna del HTML sin depender de clases CSS ofuscadas o cambiantes.
+    const BLOCK_TAGS = new Set(["P", "DIV", "LI", "BLOCKQUOTE", "DD", "DT", "SECTION", "ARTICLE", "MAIN"]);
+    const IGNORE_TAGS = new Set([
+      "SCRIPT", "STYLE", "NOSCRIPT", "SVG", "INPUT", "TEXTAREA",
+      "SELECT", "OPTION", "HEAD", "META", "LINK", "AUDIO", "VIDEO"
+    ]);
 
-    // 3. Elementos de texto estándar
-    const standardElements = Array.from(
-      document.querySelectorAll(
-        "p, blockquote, dd, dt, li, [role='paragraph'], [role='document'] p, article p, section p, main p, div[class*='paragraph' i], div[class*='text' i], div[class*='comment' i], div[data-message-author], .MuiTypography-root"
-      )
-    );
+    function countWords(str) {
+      if (!str) return 0;
+      const m = str.match(/[\p{L}\p{N}]+/gu);
+      return m ? m.length : 0;
+    }
 
-    // 4. Contenedores de contenido educativo y bloques semánticos (instrucciones, tareas, celdas de nivel)
-    const contentBlocks = Array.from(
-      document.querySelectorAll(
-        "div[role='region'], div[role='article'], div[class*='instruction' i], div[class*='description' i], div[class*='assignment' i], div[class*='submission' i], div[class*='criterion' i], div[class*='rubric' i], div[class*='cell' i], div[class*='level' i], div[class*='card' i], div[class*='content' i], div[class*='body' i]"
-      )
-    );
+    function traverseTree(node) {
+      if (!node || node.nodeType !== 1) return;
+      const tag = (node.tagName || "").toUpperCase();
+      if (IGNORE_TAGS.has(tag)) return;
+      if (node.id && typeof node.id === "string" && node.id.startsWith("docentelens-")) return;
 
-    // 5. Todos los candidatos a texto
-    const allCandidates = [...new Set([...classroomElements, ...standardElements, ...contentBlocks])];
-
-    // Filtrar candidatos válidos en el viewport con texto sustancial (mínimo 8 palabras) y fuera de elementos de UI
-    const validCandidates = allCandidates.filter(el => {
-      if (el.closest("nav, header, footer, script, style, noscript, [aria-hidden='true'], svg, button, input, textarea, select, option, .docs-title-widget, .docs-menubar, #docentelens-hud, #docentelens-tooltip, #docentelens-gdocs-root, #docentelens-gdocs-quick-button")) {
-        return false;
+      // Explorar Shadow Root abierto si el componente web lo utiliza
+      if (node.shadowRoot) {
+        traverseTree(node.shadowRoot);
       }
-      const text = (el.innerText || "").trim();
-      const words = text.match(/[\p{L}\p{N}]+/gu) || [];
-      return words.length >= 8 && isElementInViewport(el);
-    });
 
-    // 6. Algoritmo de Bloques Hoja (Leaf Text Blocks):
-    // Si un contenedor ancestro contiene a otro elemento hijo que también es un bloque de texto válido,
-    // se descarta el ancestro para iluminar únicamente el párrafo o bloque hoja específico.
-    const leafTextBlocks = validCandidates.filter(cand => {
-      return !validCandidates.some(other => other !== cand && cand.contains(other));
-    });
-
-    // Combinar rúbricas especializadas y bloques hoja evitando duplicación
-    const finalInspectable = [];
-    rubricCards.forEach(card => finalInspectable.push(card));
-
-    leafTextBlocks.forEach(block => {
-      const isInsideRubric = rubricCards.some(rc => rc !== block && rc.contains(block));
-      if (!isInsideRubric) {
-        finalInspectable.push(block);
+      // Si este nodo ya está contenido dentro de una tarjeta de rúbrica ya seleccionada, no duplicar
+      if (rubricCards.some(rc => rc !== node && rc.contains(node))) {
+        return;
       }
-    });
 
-    return [...new Set(finalInspectable)];
+      const isBlock = BLOCK_TAGS.has(tag) || (node.getAttribute && (node.getAttribute("dir") === "auto" || node.getAttribute("role") === "paragraph"));
+      const text = (node.innerText || node.textContent || "").trim();
+      const words = countWords(text);
+
+      if (isBlock && words >= 8) {
+        // Comprobar si tiene hijos directos o descendientes en bloque que contengan suficiente texto (>= 8 palabras)
+        let hasChildBlockWithSubstantialText = false;
+        const children = node.children || [];
+        for (let i = 0; i < children.length; i++) {
+          const c = children[i];
+          const cTag = (c.tagName || "").toUpperCase();
+          if (BLOCK_TAGS.has(cTag)) {
+            const cWords = countWords(c.innerText || c.textContent);
+            if (cWords >= 8) {
+              hasChildBlockWithSubstantialText = true;
+              break;
+            }
+          }
+        }
+
+        // Si ningún hijo en bloque tiene texto sustancial, este nodo es un bloque hoja (párrafo o consigna completa)
+        if (!hasChildBlockWithSubstantialText) {
+          inspectable.push(node);
+          return;
+        }
+      }
+
+      // Si es un contenedor padre con hijos en bloque, recorrer a sus hijos para alcanzar los bloques hoja
+      const children = node.children || [];
+      for (let i = 0; i < children.length; i++) {
+        traverseTree(children[i]);
+      }
+    }
+
+    if (document.body) {
+      traverseTree(document.body);
+    }
+
+    return [...new Set(inspectable)];
   }
 
   function isElementInViewport(el) {

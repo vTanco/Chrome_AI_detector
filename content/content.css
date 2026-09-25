@@ -26,18 +26,21 @@
 
 /* Iluminación específica por laboratorio IA en tarjetas y componentes */
 .docentelens-highlight-high-anthropic {
+  background-color: rgba(217, 119, 6, 0.16) !important;
   border-left: 6px solid #d97706 !important;
   box-shadow: 0 0 25px rgba(217, 119, 6, 0.4) !important;
   outline: 2px solid rgba(217, 119, 6, 0.5) !important;
 }
 
 .docentelens-highlight-high-google {
+  background-color: rgba(26, 115, 232, 0.16) !important;
   border-left: 6px solid #1a73e8 !important;
   box-shadow: 0 0 25px rgba(26, 115, 232, 0.4) !important;
   outline: 2px solid rgba(26, 115, 232, 0.5) !important;
 }
 
 .docentelens-highlight-high-openai {
+  background-color: rgba(16, 163, 127, 0.16) !important;
   border-left: 6px solid #10a37f !important;
   box-shadow: 0 0 25px rgba(16, 163, 127, 0.4) !important;
   outline: 2px solid rgba(16, 163, 127, 0.5) !important;
@@ -83,6 +86,21 @@
 
 .docentelens-badge-high {
   background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.docentelens-badge-openai {
+  background-color: #10a37f !important;
+  color: #ffffff !important;
+}
+
+.docentelens-badge-anthropic {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+}
+
+.docentelens-badge-google {
+  background-color: #1a73e8 !important;
   color: #ffffff !important;
 }
 
