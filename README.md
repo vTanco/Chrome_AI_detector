@@ -44,14 +44,19 @@ Integracion en el panel de calificacion de Google Classroom con ejecucion direct
 DocenteLens ha sido diseñada teniendo en cuenta los flujos reales de correccion docente en el ecosistema de Google Workspace:
 
 ### Google Classroom (classroom.google.com)
-- Opera en rubricas, comentarios privados, respuestas textuales directas de alumnos y paneles de calificacion.
-- Gracias a la configuracion de inyeccion en todos los marcos (`all_frames: true`), se activa automaticamente dentro de los marcos y visores de tareas entregadas por los alumnos.
+- **Rúbricas y Criterios Educativos:** Detección granular celda por celda de niveles (`.rubric-box`, `[data-level-id]`) y títulos de criterios evaluativos.
+- **Instrucciones y Tareas:** Análisis exhaustivo de cada párrafo o consigna sin importar estilos ofuscados (`[dir="auto"]`, `.QRiHXd`).
+- **Auditoría de PDFs Adjuntos en Drive/Classroom:** Extracción e iluminación directa de capas de texto en visores integrados (`.textLayer`).
+- **Hilos de Foros y Comentarios:** Identificación del autor de cada mensaje con insignias personalizadas (`[Estudiante] • [Modelo] ~XX%`).
+- **Mini-Widget de Resumen de Clase (`/submissions`):** Visor flotante con métricas en tiempo real de toda la clase y exportación de acta oficial.
+- **Informe Pericial Exportable (PDF):** Generador formal de informes periciales sin dependencias externas, incluyendo banco de 3 preguntas pedagógicas de contraste oral.
+- Gracias a la configuración de inyección en todos los marcos (`all_frames: true`), se activa automáticamente dentro de los marcos y visores de tareas entregadas por los alumnos.
 
 ### Google Docs (docs.google.com)
 - Dado que Google Docs utiliza un motor de renderizado basado en lienzo (`canvas`), DocenteLens incorpora un controlador especializado:
-  - **Enlace de eventos de cursor (`docs-texteventtarget`):** Captura la pulsacion de la tecla Comando incluso cuando el cursor de edicion se encuentra activo dentro del documento.
-  - **Analisis por Seleccion o Documento Completo:** Seleccione cualquier parrafo con el raton o pulse `Cmd + A` para seleccionar todo el texto y mantenga presionada la tecla Comando.
-  - **Tarjeta Flotante de Inspeccion:** Despliega una tarjeta superior con el nivel de probabilidad, el modelo de IA atribuido y las recomendaciones formativas para la tutoria.
+  - **Enlace de eventos de cursor (`docs-texteventtarget`):** Captura la pulsación de la tecla Comando incluso cuando el cursor de edición se encuentra activo dentro del documento.
+  - **Análisis por Selección o Documento Completo:** Seleccione cualquier párrafo con el ratón o pulse `Cmd + A` para seleccionar todo el texto y mantenga presionada la tecla Comando.
+  - **Tarjeta Flotante de Inspección:** Despliega una tarjeta superior con el nivel de probabilidad, el modelo de IA atribuido y las recomendaciones formativas para la tutoría.
 
 ---
 
@@ -153,12 +158,13 @@ DocenteLens esta concebida como un instrumento de apoyo y orientacion formativa 
 │   └── content.css          # Estilos de iluminacion, tarjetas y tooltips
 ├── background/              # Service Worker en segundo plano
 │   └── background.js
-├── lib/                     # Motores analiticos
-│   ├── ai-model-profiler.js # Atribucion de laboratorios y marcas de agua
-│   ├── ai-text-detector.js  # Calculo de burstiness y metricas textuales
-│   ├── ai-image-detector.js # Inspeccion de metadatos e imagenes
-│   ├── heuristics-es.js     # Diccionario lexico en Espanol
-│   └── heuristics-en.js     # Diccionario lexico en Ingles
+├── lib/                     # Motores analíticos y periciales
+│   ├── ai-model-profiler.js # Atribución de laboratorios y marcas de agua
+│   ├── ai-text-detector.js  # Cálculo de burstiness y métricas textuales
+│   ├── ai-image-detector.js # Inspección de metadatos e imágenes
+│   ├── report-generator.js  # Generador de informes periciales PDF y preguntas orales
+│   ├── heuristics-es.js     # Diccionario léxico en Español
+│   └── heuristics-en.js     # Diccionario léxico en Inglés
 ├── docs/
 │   └── images/              # Capturas y diagramas de uso real
 │       ├── google_docs_inspection.svg
